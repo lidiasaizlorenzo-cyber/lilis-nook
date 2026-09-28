@@ -1830,6 +1830,21 @@ button{cursor:pointer}
 .rt-dayhead-k{font-size:10.5px;color:var(--tinta-3);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
 .rt-dayhead-t{font-size:16px;font-weight:700;color:var(--tinta);margin-top:2px;font-family:var(--serif)}
 .rt-ex{background:var(--panel);border:1px solid var(--linea);border-radius:var(--r-m);padding:14px;margin-bottom:11px;box-shadow:var(--sombra)}
+.rt-circuit{background:var(--verde-ll);border:1.5px solid var(--verde-l);border-radius:var(--r-m);padding:0;margin-bottom:11px;overflow:hidden}
+.rt-circuit-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--verde-l)}
+.rt-circuit-lbl{font-size:13px;font-weight:700;color:var(--verde-dd)}
+.rt-circuit-sub{font-size:11.5px;color:var(--verde-d);margin-top:1px}
+.rt-circuit-body{padding:10px 14px}
+.rt-cex{background:var(--panel);border:1px solid var(--linea);border-radius:var(--r-s);padding:11px;margin-bottom:8px}
+.rt-cex:last-child{margin-bottom:0}
+.rt-cex-lbl{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.rt-cex-letter{width:22px;height:22px;border-radius:50%;background:var(--verde-d);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rt-cex-name{font-size:14px;font-weight:600;color:var(--tinta);flex:1}
+.rt-cfg-circuit{background:var(--verde-ll);border:1.5px solid var(--verde-l);border-radius:var(--r-m);padding:12px 14px;margin-bottom:11px}
+.rt-cfg-cir-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.rt-cfg-cir-lbl{font-size:13px;font-weight:700;color:var(--verde-dd)}
+.rt-cfg-cir-item{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--linea);border-radius:var(--r-s);padding:9px 11px;margin-bottom:7px}
+.rt-cfg-cir-item:last-child{margin-bottom:0}
 .rt-ex-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
 .rt-ex-name{font-size:15px;font-weight:700;color:var(--tinta);line-height:1.3}
 .rt-ord{width:26px;height:26px;border-radius:7px;border:1px solid var(--linea);background:var(--crema-2);font-size:14px;color:var(--tinta-2);flex-shrink:0;display:flex;align-items:center;justify-content:center;line-height:1}
@@ -3332,7 +3347,7 @@ button{cursor:pointer}
         <div class="rt-f"><label>Semanas</label><input type="text" inputmode="numeric" id="rtnew-weeks" placeholder="8"></div>
         <div class="rt-f"><label>Días por semana</label><input type="text" inputmode="numeric" id="rtnew-days" placeholder="4"></div>
       </div>
-      <div class="rt-f" style="margin-bottom:16px"><label>Fecha de inicio</label><input type="date" id="rtnew-start-txt" style="width:100%;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans);outline:none"></div>
+      <div class="rt-f" style="margin-bottom:16px"><label>Fecha de inicio</label><input type="date" id="rtnew-start-txt" style="width:100%;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans);outline:none;display:block;min-height:36px;-webkit-appearance:none"></div>
       <div class="cal-foot">
         <button class="btn btn-ghost" id="rtnew-cancel">Cancelar</button>
         <button class="btn btn-primary" id="rtnew-create">Crear</button>
@@ -9018,6 +9033,9 @@ function rtExSets(ex){
 function rtNewDay(){
   return {type:null, subtype:null, dayName:'', clase:null, claseName:'', exercises:[], cardio:[]};
 }
+function rtNewCircuit(rounds){
+  return {type:"circuit", rounds:rounds||3, items:[]};
+}
 function rtNewBlock(){
   return {mode:'continuo', machine:'cinta', series:'', tiempo:'', km:'', vel:'', incl:'', rest:'', nota:''};
 }
@@ -9148,6 +9166,17 @@ function rtBuildSess(rt, w, d){
     exercises: [], cardio: [], done:false
   };
   (day.exercises||[]).forEach(function(ex){
+    if(ex.type==='circuit'){
+      var cirSess={type:'circuit', rounds:ex.rounds||3, items:[]};
+      (ex.items||[]).forEach(function(it){
+        var eq=it.equip||rtLastEquip(it.name)||'';
+        var sets=[];
+        for(var r=0;r<cirSess.rounds;r++) sets.push({reps:it.reps||'',kg:'',done:false});
+        cirSess.items.push({name:it.name||'',equip:eq,nota:it.nota||'',sets:sets});
+      });
+      s.exercises.push(cirSess);
+      return;
+    }
     var eq = ex.equip || rtLastEquip(ex.name) || '';
     var plan = rtExSets(ex), sets=[];
     for(var i=0;i<plan.length;i++) sets.push({reps: plan[i].reps||'', kg:'', done:false, plan: plan[i].reps||''});
@@ -9351,7 +9380,7 @@ function renderEntreno(){
   if(s.type==='fuerza'){
     if(!s.exercises.length) html+='<div class="rt-empty">Este día no tiene ejercicios. Añade los que hagas hoy.</div>';
     s.exercises.forEach(function(ex,i){
-      html+=rtExerciseHTML(ex,i);
+      html+=ex.type==='circuit'?rtCircuitHTML(ex,i):rtExerciseHTML(ex,i);
     });
     html+='<button class="add-line" data-rt-addex><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Añadir ejercicio</button>';
   }
@@ -9377,6 +9406,44 @@ function renderEntreno(){
   rtBindEntreno(s);
 }
 
+function rtCircuitHTML(ex,i){
+  var lets="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  var h='<div class="rt-circuit" data-ex="'+i+'">'+
+    '<div class="rt-circuit-hd">'+
+    '<div><div class="rt-circuit-lbl">Circuito</div>'+
+    '<div class="rt-circuit-sub">'+ex.rounds+' rondas · '+ex.items.length+' ejercicios</div></div>'+
+    '<button class="rt-x" data-rt-exrm="'+i+'" aria-label="Quitar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
+    '</div>'+
+    '<div class="rt-circuit-body">';
+  (ex.items||[]).forEach(function(it,j){
+    var last=rtLastSets(it.name,it.equip);
+    var best=rtBestKg(it.name,it.equip);
+    h+='<div class="rt-cex">'+
+      '<div class="rt-cex-lbl">'+
+      '<span class="rt-cex-letter">'+lets[j]+'</span>'+
+      '<span class="rt-cex-name">'+escapeHtml(it.name||'Ejercicio')+'</span>';
+    if(best) h+='<span class="rt-pb">PB '+(best.kg?best.kg+' kg':best.reps+' reps')+'</span>';
+    h+='</div>';
+    h+='<div class="rt-eqrow" data-cir-eq="'+i+','+j+'"style="margin-bottom:6px">';
+    RT_EQUIP.forEach(function(e){ h+='<button class="chip'+(it.equip===e.k?' sel':'')+'" data-eq="'+e.k+'">'+e.l+'</button>'; });
+    h+='</div>';
+    if(it.nota) h+='<div class="rt-nota" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M9 12h6M9 16h4M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/></svg>'+escapeHtml(it.nota)+'</div>';
+    if(last&&last.sets&&last.sets.length){
+      var res=last.sets.filter(function(x){return x.kg||x.reps;}).map(function(x){return(x.reps||'?')+"×"+(x.kg?x.kg+"kg":"—");}).join("  ");
+      if(res) h+='<div class="rt-hint"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Última vez: '+escapeHtml(res)+'</div>';
+    }
+    h+='<table class="rt-sets"><thead><tr><th class="n">R</th><th>Reps</th><th>Kg</th><th class="a"></th></tr></thead><tbody>';
+    (it.sets||[]).forEach(function(st,r){
+      h+='<tr><td class="n">'+(r+1)+'</td>'+
+        '<td><input class="rt-in" type="text" inputmode="numeric" data-cir-set="'+i+','+j+','+r+',reps" value="'+escapeHtml(st.reps||'')+'" placeholder="'+escapeHtml(st.reps||'')+'"></td>'+
+        '<td><input class="rt-in" type="text" inputmode="decimal" data-cir-set="'+i+','+j+','+r+',kg" value="'+escapeHtml(st.kg||'')+'"></td>'+
+        '<td><button class="rt-tick'+(st.done?' on':'')+'" data-cir-tick="'+i+','+j+','+r+'" aria-label="Ronda hecha"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button></td></tr>';
+    });
+    h+='</tbody></table></div>';
+  });
+  h+='</div></div>';
+  return h;
+}
 function rtExerciseHTML(ex,i){
   var last=rtLastSets(ex.name, ex.equip);
   var best=rtBestKg(ex.name, ex.equip);
@@ -9478,6 +9545,33 @@ function rtBindEntreno(s){
       st.done=!st.done;
       this.classList.toggle('on',st.done);
       save();
+    });
+  });
+  // ---- CIRCUITOS ----
+  body.querySelectorAll('[data-cir-eq]').forEach(function(row){
+    row.addEventListener('click',function(e){
+      var b=e.target.closest('[data-eq]'); if(!b) return;
+      var p=this.getAttribute('data-cir-eq').split(',');
+      s.exercises[+p[0]].items[+p[1]].equip=b.getAttribute('data-eq');
+      save();
+      row.querySelectorAll('[data-eq]').forEach(function(c){
+        c.classList.toggle('sel',c.getAttribute('data-eq')===b.getAttribute('data-eq'));
+      });
+    });
+  });
+  body.querySelectorAll('[data-cir-set]').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var p=this.getAttribute('data-cir-set').split(',');
+      s.exercises[+p[0]].items[+p[1]].sets[+p[2]][p[3]]=this.value;
+      save();
+    });
+  });
+  body.querySelectorAll('[data-cir-tick]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var p=this.getAttribute('data-cir-tick').split(',');
+      var st=s.exercises[+p[0]].items[+p[1]].sets[+p[2]];
+      st.done=!st.done; save();
+      this.classList.toggle('on',st.done);
     });
   });
   body.querySelectorAll('[data-rt-setrm]').forEach(function(b){
@@ -9663,8 +9757,35 @@ function rtSessTieneDatos(s){
 function rtFinish(s){
   var nuevos=[];
   s.exercises.forEach(function(ex){
+    // circuito: registrar PBs de cada item
+    if(ex.type==='circuit'){
+      (ex.items||[]).forEach(function(it){
+        if(!it.name) return;
+        var best=null;
+        (it.sets||[]).forEach(function(st){
+          if(!st.done) return;
+          var kg=parseFloat(String(st.kg).replace(',','.'))||0;
+          var reps=parseInt(st.reps,10)||0;
+          if(!kg&&!reps) return;
+          if(!best||kg>best.kg||(kg===best.kg&&reps>best.reps)) best={kg:kg,reps:reps};
+        });
+        if(!best) return;
+        var prev=rtBestKg(it.name,it.equip);
+        var esPB=!prev||best.kg>(prev.kg||0)||(best.kg===(prev.kg||0)&&best.reps>(prev.reps||0));
+        var key=rtFindPrKey(it.name,it.equip)||rtPrKey(it.name,it.equip);
+        var recs=store.get('pr',key,[])||[];
+        var idx=-1; for(var i=0;i<recs.length;i++) if(recs[i].date===CURRENT) idx=i;
+        var rec={date:CURRENT,reps:String(best.reps||''),kg:best.kg?String(best.kg):'',sec:''};
+        if(idx>=0) recs[idx]=rec; else recs.push(rec);
+        store.set('pr',key,recs);
+        rtSaveLastSets(it.name,it.equip,it.sets.map(function(x){return{reps:x.reps,kg:x.kg};}),CURRENT);
+        if(esPB&&(best.kg>0||best.reps>0)) nuevos.push(it.name);
+      });
+      return;
+    }
     var best=null;
     ex.sets.forEach(function(st){
+      if(!st.done) return;
       var kg=parseFloat(String(st.kg).replace(',','.'))||0;
       var reps=parseInt(st.reps,10)||0;
       if(!kg && !reps) return;
@@ -9712,6 +9833,10 @@ function rtApplyToPlan(s){
   var day=rt.weeks[s.weekIdx].days[s.dayIdx];
   day.dayName = s.dayName||'';
   day.exercises = s.exercises.map(function(e){
+    if(e.type==='circuit'){
+      return {type:'circuit', rounds:e.rounds, items:e.items.map(function(it){
+        return {name:it.name, equip:it.equip||'', nota:it.nota||'',
+          reps:it.sets&&it.sets[0]?it.sets[0].reps:''};})};}
     return {name:e.name, sets:e.sets.length, equip:e.equip||'',
             setsList: e.sets.map(function(st){ return {reps: st.reps||st.plan||''}; })};
   });
@@ -9864,8 +9989,8 @@ function renderRutinaEdit(){
   html+='<div class="rt-acts" style="margin:0 0 4px">'+
     '<button class="rt-mini" id="rt-rename"><svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/></svg>Cambiar nombre</button>'+
     '</div>'+
-    '<div class="rt-f" style="margin-bottom:12px"><label>Empieza el (DD/MM/AAAA)</label>'+
-    '<input type="date" id="rt-edit-start-txt" style="width:100%;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans);outline:none" value="'+escapeHtml(_sdVal||'')+'"></div>';
+    '<div class="rt-f" style="margin-bottom:12px"><label>Fecha de inicio</label>'+
+    '<input type="date" id="rt-edit-start-txt" style="width:100%;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans)" value="'+escapeHtml(_sdVal||'')+'"></div>';
 
   html+='<div class="rt-lab">Semanas ('+rt.weeks.length+')</div><div class="rt-pills">';
   rt.weeks.forEach(function(_,i){
@@ -9909,11 +10034,10 @@ function renderRutinaEdit(){
     rt.startDate=this.value||null; rtSaveOne(rt);
   });
   var _est=document.getElementById('rt-edit-start-txt');
-  if(_est) _est.addEventListener('input',function(){
-    var v=this.value.trim();
-    if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)){var p=v.split('/');rt.startDate=p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');rtSaveOne(rt);}
-    else if(!v){rt.startDate=null;rtSaveOne(rt);}
-  });
+  if(_est){
+    _est.addEventListener('change',function(){ rt.startDate=this.value||null; rtSaveOne(rt); });
+    _est.addEventListener('input',function(){ rt.startDate=this.value||null; rtSaveOne(rt); });
+  }
   document.getElementById('rt-rename').addEventListener('click',function(){
     promptSheet('Nombre de la rutina','Cómo quieres llamarla', rt.name, function(v){
       v=(v||'').trim(); if(!v) return;
@@ -10001,6 +10125,31 @@ function renderDiaConfig(){
     html+='<div class="rt-lab">Ejercicios</div>';
     if(!day.exercises.length) html+='<div class="rt-empty" style="padding:8px 0 12px">Aún no hay ejercicios.</div>';
     day.exercises.forEach(function(ex,i){
+      if(ex.type==='circuit'){
+        var lets='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        html+='<div class="rt-cfg-circuit">'+
+          '<div class="rt-cfg-cir-hd">'+
+            '<div>'+
+              '<div class="rt-cfg-cir-lbl">Circuito · '+ex.rounds+' rondas</div>'+
+            '</div>'+
+            '<div style="display:flex;align-items:center;gap:6px">'+
+              '<button class="rt-ord" data-cir-rounds-m="'+i+'" title="Menos rondas">−</button>'+
+              '<span style="font-size:13px;font-weight:700;color:var(--verde-dd);min-width:18px;text-align:center">'+ex.rounds+'</span>'+
+              '<button class="rt-ord" data-cir-rounds-p="'+i+'" title="Más rondas">+</button>'+
+              '<button class="rt-x" data-cfg-rm="'+i+'" aria-label="Quitar circuito"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
+            '</div>'+
+          '</div>';
+        ex.items.forEach(function(it,j){
+          html+='<div class="rt-cfg-cir-item">'+
+            '<span class="rt-cex-letter">'+lets[j]+'</span>'+
+            '<input class="nm" type="text" data-cir-name="'+i+','+j+'" value="'+escapeHtml(it.name||'')+'" placeholder="Nombre del ejercicio" style="flex:1">'+
+            '<button class="rt-x" data-cir-rm-item="'+i+','+j+'"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
+          '</div>';
+        });
+        html+='<button class="add-line" data-cir-additem="'+i+'" style="margin-top:8px;background:transparent;border-color:var(--verde-l)"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Añadir ejercicio al circuito</button>'+
+          '</div>';
+        return;
+      }
       var plan=rtExSets(ex);
       html+='<div class="rt-exbox">'+
         '<div class="rt-cfgex" style="margin-bottom:9px">'+
@@ -10029,7 +10178,10 @@ function renderDiaConfig(){
         '</div>'+
         '</div>';
     });
-    html+='<button class="add-line" id="rt-cfg-addex"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Añadir ejercicio</button>';
+    html+='<div style="display:flex;gap:8px">'+
+      '<button class="add-line" id="rt-cfg-addex" style="flex:1"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Añadir ejercicio</button>'+
+      '<button class="add-line" id="rt-cfg-addcirc" style="flex:1;background:var(--verde-ll);border-color:var(--verde-l)"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Añadir circuito</button>'+
+      '</div>';
     html+='<p class="rt-note">El material es el habitual. El día que lo cambies, lo cambias en el entreno y se guarda aparte.</p>';
   }
 
@@ -10068,6 +10220,41 @@ function renderDiaConfig(){
   var cn=document.getElementById('rt-cfg-clasename');
   if(cn) cn.addEventListener('input',function(){ day.claseName=this.value; save(); });
 
+  // ---- Circuitos ----
+  var addCirc=document.getElementById('rt-cfg-addcirc');
+  if(addCirc) addCirc.addEventListener('click',function(){
+    day.exercises.push(rtNewCircuit(3)); save(); renderDiaConfig();
+  });
+  document.querySelectorAll('[data-cir-rounds-p]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=+this.getAttribute('data-cir-rounds-p');
+      day.exercises[i].rounds=Math.min(10,(day.exercises[i].rounds||3)+1); save(); renderDiaConfig();
+    });
+  });
+  document.querySelectorAll('[data-cir-rounds-m]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=+this.getAttribute('data-cir-rounds-m');
+      day.exercises[i].rounds=Math.max(1,(day.exercises[i].rounds||3)-1); save(); renderDiaConfig();
+    });
+  });
+  document.querySelectorAll('[data-cir-additem]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=+this.getAttribute('data-cir-additem');
+      day.exercises[i].items.push({name:'',equip:'',nota:'',sets:3}); save(); renderDiaConfig();
+    });
+  });
+  document.querySelectorAll('[data-cir-name]').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var p=this.getAttribute('data-cir-name').split(',');
+      day.exercises[+p[0]].items[+p[1]].name=this.value; save();
+    });
+  });
+  document.querySelectorAll('[data-cir-rm-item]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var p=this.getAttribute('data-cir-rm-item').split(',');
+      day.exercises[+p[0]].items.splice(+p[1],1); save(); renderDiaConfig();
+    });
+  });
   document.querySelectorAll('[data-cfg-up]').forEach(function(b){
     b.addEventListener('click',function(){
       var i=+this.getAttribute('data-cfg-up'); if(i===0) return;
