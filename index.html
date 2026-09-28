@@ -3347,7 +3347,7 @@ button{cursor:pointer}
         <div class="rt-f"><label>Semanas</label><input type="text" inputmode="numeric" id="rtnew-weeks" placeholder="8"></div>
         <div class="rt-f"><label>Días por semana</label><input type="text" inputmode="numeric" id="rtnew-days" placeholder="4"></div>
       </div>
-      <div class="rt-f" style="margin-bottom:16px"><label>Fecha de inicio</label><input type="date" id="rtnew-start-txt" style="width:100%;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans);outline:none;display:block;min-height:36px;-webkit-appearance:none"></div>
+      <div style="margin-bottom:16px"><div class="rt-lab" style="margin-bottom:5px">Fecha de inicio</div><input type="date" id="rtnew-start-txt" style="width:100%;font-size:15px;font-weight:600;color:var(--tinta);font-family:var(--sans);padding:10px 12px;border:1.5px solid var(--linea);border-radius:14px;background:var(--crema-2);display:block;box-sizing:border-box"></div>
       <div class="cal-foot">
         <button class="btn btn-ghost" id="rtnew-cancel">Cancelar</button>
         <button class="btn btn-primary" id="rtnew-create">Crear</button>
@@ -9989,8 +9989,10 @@ function renderRutinaEdit(){
   html+='<div class="rt-acts" style="margin:0 0 4px">'+
     '<button class="rt-mini" id="rt-rename"><svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/></svg>Cambiar nombre</button>'+
     '</div>'+
-    '<div class="rt-f" style="margin-bottom:12px"><label>Fecha de inicio</label>'+
-    '<input type="date" id="rt-edit-start-txt" style="width:100%;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans)" value="'+escapeHtml(_sdVal||'')+'"></div>';
+    '<div style="margin-bottom:12px">'+
+    '<div class="rt-lab" style="margin-bottom:5px">Fecha de inicio</div>'+
+    '<input type="date" id="rt-edit-start-txt" style="width:100%;font-size:15px;font-weight:600;color:var(--tinta);font-family:var(--sans);padding:10px 12px;border:1.5px solid var(--linea);border-radius:14px;background:var(--crema-2);display:block;box-sizing:border-box" value="'+escapeHtml(_sdVal||'')+'">'+
+    '</div>';
 
   html+='<div class="rt-lab">Semanas ('+rt.weeks.length+')</div><div class="rt-pills">';
   rt.weeks.forEach(function(_,i){
