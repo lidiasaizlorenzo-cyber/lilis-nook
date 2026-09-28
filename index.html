@@ -1832,6 +1832,9 @@ button{cursor:pointer}
 .rt-ex{background:var(--panel);border:1px solid var(--linea);border-radius:var(--r-m);padding:14px;margin-bottom:11px;box-shadow:var(--sombra)}
 .rt-ex-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
 .rt-ex-name{font-size:15px;font-weight:700;color:var(--tinta);line-height:1.3}
+.rt-ord{width:26px;height:26px;border-radius:7px;border:1px solid var(--linea);background:var(--crema-2);font-size:14px;color:var(--tinta-2);flex-shrink:0;display:flex;align-items:center;justify-content:center;line-height:1}
+.rt-ord:active{background:var(--verde-ll);border-color:var(--verde-l);color:var(--verde-d)}
+.rt-ord[disabled]{opacity:.25;pointer-events:none}
 .rt-x{width:26px;height:26px;border-radius:50%;background:var(--crema-2);border:1px solid var(--linea);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rt-x svg{width:13px;height:13px;stroke:var(--tinta-3);fill:none;stroke-width:2.4;stroke-linecap:round}
 .rt-x:active{transform:scale(.92)}
@@ -3329,7 +3332,7 @@ button{cursor:pointer}
         <div class="rt-f"><label>Semanas</label><input type="text" inputmode="numeric" id="rtnew-weeks" placeholder="8"></div>
         <div class="rt-f"><label>Días por semana</label><input type="text" inputmode="numeric" id="rtnew-days" placeholder="4"></div>
       </div>
-      <div class="rt-f" style="margin-bottom:16px"><label>Empieza el (DD/MM/AAAA)</label><input type="text" inputmode="numeric" id="rtnew-start-txt" placeholder="ej. 01/10/2026" maxlength="10"></div>
+      <div class="rt-f" style="margin-bottom:16px"><label>Fecha de inicio</label><input type="date" id="rtnew-start-txt" style="width:100%;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans);outline:none"></div>
       <div class="cal-foot">
         <button class="btn btn-ghost" id="rtnew-cancel">Cancelar</button>
         <button class="btn btn-primary" id="rtnew-create">Crear</button>
@@ -9828,8 +9831,7 @@ document.getElementById('rtnew-create').addEventListener('click',function(){
   var w=Math.min(52,Math.max(1, parseInt(document.getElementById('rtnew-weeks').value,10)||8));
   var d=Math.min(7, Math.max(1, parseInt(document.getElementById('rtnew-days').value,10)||4));
   var _sv=(document.getElementById('rtnew-start-txt')||{value:''}).value.trim();
-  var _sd=null; if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(_sv)){var _p=_sv.split('/');_sd=_p[2]+'-'+_p[1].padStart(2,'0')+'-'+_p[0].padStart(2,'0');}
-  var rt={id:'rt_'+Date.now(), name:name, archived:false, createdAt:CURRENT, startDate:_sd, weeks:[]};
+  var rt={id:'rt_'+Date.now(), name:name, archived:false, createdAt:CURRENT, startDate:_sv||null, weeks:[]};
   for(var i=0;i<w;i++){
     var wk={days:[]};
     for(var j=0;j<d;j++) wk.days.push(rtNewDay());
@@ -9858,12 +9860,12 @@ function renderRutinaEdit(){
   var wk=rt.weeks[RT_EDIT.w];
 
   var html='';
-  var _sdFmt2=rt.startDate?(function(v){var p=v.split('-');return p[2]+'/'+p[1]+'/'+p[0];})(rt.startDate):'';
+  var _sdVal=(rt.startDate&&/^\d{4}-\d{2}-\d{2}$/.test(rt.startDate))?rt.startDate:'';
   html+='<div class="rt-acts" style="margin:0 0 4px">'+
     '<button class="rt-mini" id="rt-rename"><svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/></svg>Cambiar nombre</button>'+
     '</div>'+
     '<div class="rt-f" style="margin-bottom:12px"><label>Empieza el (DD/MM/AAAA)</label>'+
-    '<input type="text" inputmode="numeric" id="rt-edit-start-txt" placeholder="ej. 01/10/2026" maxlength="10" value="'+escapeHtml(_sdFmt2)+'"></div>';
+    '<input type="date" id="rt-edit-start-txt" style="width:100%;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--tinta);font-family:var(--sans);outline:none" value="'+escapeHtml(_sdVal||'')+'"></div>';
 
   html+='<div class="rt-lab">Semanas ('+rt.weeks.length+')</div><div class="rt-pills">';
   rt.weeks.forEach(function(_,i){
@@ -10002,7 +10004,9 @@ function renderDiaConfig(){
       var plan=rtExSets(ex);
       html+='<div class="rt-exbox">'+
         '<div class="rt-cfgex" style="margin-bottom:9px">'+
+        '<button class="rt-ord" data-cfg-up="'+i+'" aria-label="Subir"'+(i===0?' disabled':'')+'>&#8593;</button>'+
         '<input class="nm" type="text" data-cfg-name="'+i+'" value="'+escapeHtml(ex.name||'')+'" placeholder="Nombre del ejercicio">'+
+        '<button class="rt-ord" data-cfg-dn="'+i+'" aria-label="Bajar"'+(i===day.exercises.length-1?' disabled':'')+'>&#8595;</button>'+
         '<button class="rt-x" data-cfg-rm="'+i+'" aria-label="Quitar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'+
         '</div>'+
         '<div class="rt-eqrow" data-cfg-eq="'+i+'">'+
@@ -10064,6 +10068,20 @@ function renderDiaConfig(){
   var cn=document.getElementById('rt-cfg-clasename');
   if(cn) cn.addEventListener('input',function(){ day.claseName=this.value; save(); });
 
+  document.querySelectorAll('[data-cfg-up]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=+this.getAttribute('data-cfg-up'); if(i===0) return;
+      var tmp=day.exercises.splice(i,1)[0]; day.exercises.splice(i-1,0,tmp);
+      save(); renderDiaConfig();
+    });
+  });
+  document.querySelectorAll('[data-cfg-dn]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=+this.getAttribute('data-cfg-dn'); if(i>=day.exercises.length-1) return;
+      var tmp=day.exercises.splice(i,1)[0]; day.exercises.splice(i+1,0,tmp);
+      save(); renderDiaConfig();
+    });
+  });
   document.querySelectorAll('[data-cfg-name]').forEach(function(inp){
     inp.addEventListener('input',function(){ day.exercises[+this.getAttribute('data-cfg-name')].name=this.value; save(); });
   });
