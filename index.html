@@ -4343,6 +4343,20 @@ function renderMacros(){
 }
 function renderGymBottomLink(){
   var el=document.getElementById('gym-bottom-link'); if(!el) return;
+  // Si gym ya está hecho hoy → mostrar lo que se hizo
+  if(DAY.gym && DAY.gym.done){
+    var sess=rtRepSess?rtRepSess():null;
+    var label='Entreno completado';
+    if(sess&&sess.dayName) label=escapeHtml(sess.dayName);
+    else if(DAY.gym.type==='cycling') label='Cycling';
+    else if(DAY.gym.type==='fuerza'){
+      var fm={upper:'Fuerza · Upper',lower:'Fuerza · Lower','full body':'Fuerza · Full body'};
+      label=fm[DAY.gym.fgroup]||'Fuerza';
+    } else if(DAY.gym.type==='otro'&&DAY.gym.otro) label=escapeHtml(DAY.gym.otro);
+    el.innerHTML='<div class="gym-done-note"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>'+label+'</div>';
+    return;
+  }
+  // Si no está hecho → mostrar el día que toca
   {
     var nx=rtNext();
     var rtName='', rtDay='';
@@ -5819,10 +5833,8 @@ function dayCounts(dk){
   if(!d) return false;
   if(sleepOf(d)==null) return false;
   if(!d.mood) return false;
-  if(d.mealJudge!=='si') return false;
-  if(!(d.skin&&(d.skin.am||d.skin.pm))) return false;
   if(!d.steps || parseInt(d.steps,10)<=0) return false;
-  if(!(d.frapo&&(d.frapo.am||d.frapo.pm))) return false;
+  if(!(d.skin&&(d.skin.am||d.skin.pm))) return false;
   return true;
 }
 /* Cuenta cuántas cosas imprescindibles cumple un día (de 6) — para mostrar progreso del día */
