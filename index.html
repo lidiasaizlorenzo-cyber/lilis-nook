@@ -1255,6 +1255,9 @@ button{cursor:pointer}
 .wk-plan-byday-row{display:flex;align-items:center;gap:9px}
 .wk-plan-byday-d{width:32px;font-size:11px;font-weight:800;color:var(--verde-d);text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;font-family:var(--sans)}
 .wk-plan-byday-chips{flex:1;display:flex;flex-wrap:wrap;gap:4px}
+.wk-plan-byday-chips{flex:1;display:flex;flex-wrap:wrap;gap:5px}
+.wk-day-chip{font-size:11px;padding:5px 10px;border-radius:20px}
+.wk-day-rest{}
 .wk-plan-daysel{flex:1;background:var(--crema-2);border:1px solid var(--linea);border-radius:var(--r-s);padding:9px 10px;font-size:13px;font-weight:600;color:var(--tinta);font-family:var(--sans)}
 .wk-plan-daysel:focus{outline:none;border-color:var(--verde)}
 .wk-plan-byday-sumrow{display:flex;align-items:center;gap:10px;padding:3px 0}
@@ -5852,7 +5855,9 @@ function dayProgress(dk){
 }
 function computeStreaks(){
   var d=parseKey(TODAY), cur=0;
-  for(var i=0;i<400;i++){ var dd=new Date(d); dd.setDate(d.getDate()-i); if(dayCounts(dateKey(dd))) cur++; else break; }
+  // Si hoy aún no cuenta (día en progreso), empezar desde ayer
+  var startOffset=dayCounts(TODAY)?0:1;
+  for(var i=startOffset;i<400;i++){ var dd=new Date(d); dd.setDate(d.getDate()-i); if(dayCounts(dateKey(dd))) cur++; else break; }
   var keys=allDayKeys(), best=0,run=0,prev=null;
   keys.forEach(function(dk){
     if(!dayCounts(dk)) return;
@@ -7088,9 +7093,10 @@ function getPlannedGymToday(){
   var plan = getWkPlan();
   WK_OFFSET = savedOffset;
   if(!plan || !plan.gymByDay) return null;
-  var key = plan.gymByDay[dow];
-  if(!key || key==='nada') return null;
-  return key;
+  var val = plan.gymByDay[dow];
+  var arr=wkDayArr(val);
+  if(!arr.length) return null;
+  return arr[0]; // devuelve el primero (para compatibilidad)
 }
 
 /* Helper: ¿el usuario ya respondió al aviso del plan hoy? */
@@ -7318,14 +7324,17 @@ function renderWkPlan(){
     // ---- Deporte por día: un desplegable por día (más fácil de leer que filas de chips)
     if(!draft.gymByDay) draft.gymByDay = {};
     var gymByDayRows = WKPLAN_DAYS_SHORT.map(function(d, di){
-      var current = draft.gymByDay[di] || 'nada';
-      var opts = WKPLAN_GYM_OPTS.map(function(o){
-        return '<option value="'+o.k+'"'+(current===o.k?' selected':'')+'>'+o.lab+'</option>';
+      var cur=wkDayArr(draft.gymByDay[di]);
+      var chips=WKPLAN_GYM_OPTS.filter(function(o){return o.k!=='nada';}).map(function(o){
+        return '<button class="chip wk-day-chip'+(cur.indexOf(o.k)>=0?' sel':'')
+          +'" data-wk-byday="'+di+'" data-wk-bdval="'+o.k+'">'+o.lab+'</button>';
       }).join('');
       return '<div class="wk-plan-byday-row">'+
         '<div class="wk-plan-byday-d">'+d+'</div>'+
-        '<select class="wk-plan-daysel" data-wk-byday="'+di+'">'+opts+'</select>'+
-      '</div>';
+        '<div class="wk-plan-byday-chips">'+
+        '<button class="chip wk-day-chip wk-day-rest'+(cur.length===0?' sel':'')
+          +'" data-wk-byday="'+di+'" data-wk-bdval="nada">Descanso</button>'+
+        chips+'</div></div>';
     }).join('');
 
     body.innerHTML =
@@ -7359,13 +7368,20 @@ function renderWkPlan(){
       });
     });
 
-    // gym por día: desplegable
-    document.querySelectorAll('[data-wk-byday]').forEach(function(sl){
-      sl.addEventListener('change',function(){
+    // gym por día: chips multi-select
+    document.querySelectorAll('[data-wk-byday]').forEach(function(btn){
+      btn.addEventListener('click',function(){
         var di=parseInt(this.getAttribute('data-wk-byday'),10);
-        var k=this.value;
-        if(k==='nada') delete draft.gymByDay[di];
-        else draft.gymByDay[di]=k;
+        var k=this.getAttribute('data-wk-bdval');
+        if(k==='nada'){ draft.gymByDay[di]=[]; }
+        else {
+          var cur=wkDayArr(draft.gymByDay[di]);
+          var idx=cur.indexOf(k);
+          if(idx>=0) cur.splice(idx,1); else cur.push(k);
+          draft.gymByDay[di]=cur.length?cur:[];
+        }
+        // re-renderizar solo la fila
+        renderWkPlan();
       });
     });
 
@@ -7417,11 +7433,10 @@ function renderWkPlan(){
   }
   if(plan.gymByDay && Object.keys(plan.gymByDay).length){
     var dayLines = WKPLAN_DAYS_SHORT.map(function(d,di){
-      var v = plan.gymByDay[di];
-      if(!v) return null;
-      var o = WKPLAN_GYM_OPTS.filter(function(x){return x.k===v;})[0];
-      var lab = o?o.lab:v;
-      return '<div class="wk-plan-byday-sumrow"><span class="wk-plan-byday-sumd">'+d+'</span><span class="pp-gymchip">'+lab+'</span></div>';
+      var arr=wkDayArr(plan.gymByDay[di]);
+      if(!arr.length) return null;
+      var labs=arr.map(function(k){ var o=WKPLAN_GYM_OPTS.filter(function(x){return x.k===k;})[0]; return '<span class="pp-gymchip">'+(o?o.lab:k)+'</span>'; }).join('');
+      return '<div class="wk-plan-byday-sumrow"><span class="wk-plan-byday-sumd">'+d+'</span>'+labs+'</div>';
     }).filter(Boolean).join('');
     if(dayLines){
       rows += '<div class="wk-plan-summary-row"><div class="wk-plan-summary-k">Deporte</div><div class="wk-plan-summary-v" style="text-align:left;display:block">'+dayLines+'</div></div>';
@@ -7479,6 +7494,11 @@ function rtNeedWeekAsk(rt){
   return rtGetWeekPref(rt.id,ctx.mondayKey)===null;
 }
 
+function wkDayArr(val){
+  // normaliza string o array → array (retrocompatible)
+  if(!val||val==='nada') return [];
+  return Array.isArray(val)?val:[val];
+}
 function miMenteDia(d){ return !!(d && (d.read||d.enrich||d.studyLang||d.studyCourse||d.crochet)); }
 function escapeHtml(s){
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -8389,9 +8409,8 @@ function renderSemana(){
     {k:'Sueño',get:function(d){ if(sleepOf(d)==null) return null; return Math.round(sleepOf(d)/60*10)/10+'h'; }},
     {k:'Gym',get:function(d){
       if(!d||!d.gym||!d.gym.done) return null;
-      if(d.gym.type==='cycling') return 'C';
-      if(d.gym.type==='fuerza') return 'F';
-      if(d.gym.type==='cardio') return 'C';
+      var t=d.gym.type;
+      if(t==='cycling'||t==='cardio') return 'C';
       return 'F';
     }},
     {k:'Skincare',get:function(d){ if(!d||!d.skin) return null; if(d.skin.am&&d.skin.pm) return '●●'; if(d.skin.am) return '●·'; if(d.skin.pm) return '·●'; return null; }},
