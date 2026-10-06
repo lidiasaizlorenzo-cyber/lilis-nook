@@ -8303,45 +8303,89 @@ function rtNeedWeekAsk(rt){
 }
 
 function generateWeekReport(){
-  // Obtener las fechas de la semana actual
   var d=new Date(parseKey(TODAY));
   var dow=d.getDay()===0?6:d.getDay()-1;
   var monday=new Date(d); monday.setDate(d.getDate()-dow);
   var lines=['RESUMEN DE LA SEMANA',''];
-  var totalSleep=0, totalSteps=0, dias=0;
-  var comidas=[], pesos=[];
+  var totalSleep=0, totalSteps=0, totalKcal=0, totalProt=0, dias=0, diasKcal=0;
+  var pesos=[], comidas=[];
+  var DNAMES=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
   for(var i=0;i<7;i++){
     var day=new Date(monday); day.setDate(monday.getDate()+i);
     var dk=dateKey(day);
-    var ddata=store.get('day',dk,null);
-    var dname=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'][i];
-    if(!ddata){ lines.push(dname+': sin datos'); continue; }
+    var dd=store.get('day',dk,null);
+    var dn=DNAMES[i];
+    if(!dd){ lines.push(dn+': sin datos'); continue; }
     dias++;
-    var sl=sleepOf(ddata)||0; totalSleep+=sl;
-    var st=parseInt(ddata.steps,10)||0; totalSteps+=st;
+    var sl=sleepOf(dd)||0; totalSleep+=sl;
+    var st=parseInt(dd.steps,10)||0; totalSteps+=st;
     var slH=sl>0?(Math.floor(sl/60)+'h'+(sl%60>0?' '+(sl%60)+'min':'')):'—';
-    var gymTx=ddata.gym&&ddata.gym.done?'Gym ✓':'';
-    var moodTx=ddata.mood?'Ánimo: '+ddata.mood:'';
-    var wTx=ddata.weight?'Peso: '+ddata.weight+'kg':'';
-    if(ddata.weight) pesos.push(parseFloat(ddata.weight));
-    lines.push(dname+' — Sueño: '+slH+(st?' | Pasos: '+st.toLocaleString():'')+(gymTx?' | '+gymTx:'')+(moodTx?' | '+moodTx:'')+(wTx?' | '+wTx:''));
-    if(ddata.food) comidas.push(dname+': '+ddata.food);
+    // entreno del día: tipo simplificado
+    var gymTx='';
+    if(dd.gym&&dd.gym.done){
+      var gtype=dd.gym.type||'';
+      if(gtype==='fuerza'){
+        var fg={upper:'Upper',lower:'Lower','full body':'Full body'};
+        gymTx='Fuerza'+(dd.gym.fgroup&&fg[dd.gym.fgroup]?' '+fg[dd.gym.fgroup]:'');
+      } else if(gtype==='cycling') gymTx='Cycling';
+      else if(gtype==='cardio'){
+        var sess=store.get('sess',dk,null);
+        var mach=sess&&sess.cardio&&sess.cardio[0]&&sess.cardio[0].machine;
+        var machLab={cycling:'Cycling',cinta:'Cinta',step:'Step master',bici:'Bici',eliptica:'Elíptica',remo:'Remo'};
+        gymTx='Cardio'+(mach&&machLab[mach]?' '+machLab[mach]:'');
+      } else if(gtype==='clase'){
+        gymTx='Clase'+(dd.gym.clase?' '+dd.gym.clase:'');
+      } else gymTx='Entreno';
+    }
+    var moodTx=dd.mood?'Ánimo: '+dd.mood:'';
+    var wTx=dd.weight?'Peso: '+dd.weight+' kg':'';
+    if(dd.weight) pesos.push(parseFloat(dd.weight));
+    var kcal=dd.macros&&dd.macros.kcal?parseInt(dd.macros.kcal,10):0;
+    var prot=dd.macros&&dd.macros.prot?parseInt(dd.macros.prot,10):0;
+    var kcalTx=kcal?'Kcal: '+kcal+(prot?' | Prot: '+prot+'g':''):'';
+    if(kcal){ totalKcal+=kcal; diasKcal++; }
+    if(prot) totalProt+=prot;
+    var parts=[dn+' — Sueño: '+slH];
+    if(st) parts.push('Pasos: '+st.toLocaleString());
+    if(wTx) parts.push(wTx);
+    if(kcalTx) parts.push(kcalTx);
+    if(gymTx) parts.push(gymTx);
+    if(moodTx) parts.push(moodTx);
+    lines.push(parts.join(' | '));
+    if(dd.food) comidas.push(dn+': '+dd.food);
   }
   lines.push('');
-  lines.push('TOTALES');
+  lines.push('── TOTALES ──');
   if(dias>0){
     var avgSleep=Math.round(totalSleep/dias);
-    lines.push('Sueño medio: '+(Math.floor(avgSleep/60))+'h '+(avgSleep%60)+'min');
+    lines.push('Sueño medio: '+Math.floor(avgSleep/60)+'h '+(avgSleep%60)+'min');
     lines.push('Pasos totales: '+totalSteps.toLocaleString());
-    if(pesos.length) lines.push('Peso (último): '+pesos[pesos.length-1]+'kg');
+    if(pesos.length>1){
+      var varPeso=(pesos[pesos.length-1]-pesos[0]);
+      lines.push('Variación de peso: '+(varPeso>0?'+':'')+varPeso.toFixed(1)+' kg ('+pesos[0].toFixed(1)+' → '+pesos[pesos.length-1].toFixed(1)+' kg)');
+    } else if(pesos.length===1){
+      lines.push('Peso registrado: '+pesos[0].toFixed(1)+' kg');
+    }
+    if(diasKcal>0){
+      lines.push('Kcal totales: '+totalKcal.toLocaleString());
+      lines.push('Kcal media diaria: '+Math.round(totalKcal/diasKcal).toLocaleString());
+      if(totalProt) lines.push('Proteína total: '+totalProt+'g (media '+Math.round(totalProt/diasKcal)+'g/día)');
+    }
   }
-  if(comidas.length){ lines.push(''); lines.push('COMIDAS'); comidas.forEach(function(c){lines.push(c);}); }
+  // días entrenados
+  var diasGym=0;
+  for(var j=0;j<7;j++){
+    var _dk=dateKey(new Date(monday.getTime()+j*86400000));
+    var _dd=store.get('day',_dk,null);
+    if(_dd&&_dd.gym&&_dd.gym.done) diasGym++;
+  }
+  lines.push('Días entrenados: '+diasGym+' de 7');
+  if(comidas.length){ lines.push(''); lines.push('── COMIDAS ──'); comidas.forEach(function(c){lines.push(c);}); }
   var txt=lines.join('\n');
   var blob=new Blob([txt],{type:'text/plain'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  var w=new Date(monday); 
-  a.download='semana-'+dateKey(w)+'.txt';
+  a.download='semana-'+dateKey(monday)+'.txt';
   a.click();
 }
 function wkDayArr(val){
