@@ -2344,16 +2344,10 @@ button{cursor:pointer}
               Gym
             </div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="gym-check" id="gym-check" aria-label="Marcar gym hecho">
             <span class="gc-ring-big"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
             <span class="gc-l" id="gym-check-l">Marcar hecho</span>
           </button>
-          <button class="gym-check" id="gym-rest" aria-label="Marcar descanso" style="border-color:var(--tierra-l,#D4B896);background:var(--crema)">
-            <span class="gc-ring-big" style="border-color:var(--tierra,#B07A6E)"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg></span>
-            <span class="gc-l" id="gym-rest-l">Descanso</span>
-          </button>
-          </div>
         </div>
 
         <div id="gym-body" class="gym-body" style="display:none">
@@ -5082,13 +5076,11 @@ function renderMeals(){
   });
   document.getElementById('meals-wrap').innerHTML=html;
   document.querySelectorAll('[data-meal]').forEach(function(ta){
+    autoGrow(ta);
     ta.addEventListener('input',function(){
       DAY.meals[this.getAttribute('data-meal')]=this.value; autoGrow(this); saveDay();
     });
   });
-  setTimeout(function(){
-    document.querySelectorAll('[data-meal]').forEach(function(ta){ autoGrow(ta); });
-  },0);
 }
 function monthGlovo(){
   var d=parseKey(CURRENT), y=d.getFullYear(), m=d.getMonth();
@@ -5677,8 +5669,6 @@ function renderDia(){
   gc.classList.toggle('done',DAY.gym.done);
 
   var _gcl=document.getElementById('gym-check-l'); if(_gcl) _gcl.textContent=DAY.gym.done?'Hecho':'Marcar hecho';
-  var _gr=document.getElementById('gym-rest'); if(_gr) _gr.classList.toggle('done',!!DAY.gym.rest);
-  var _grl=document.getElementById('gym-rest-l'); if(_grl) _grl.textContent=DAY.gym.rest?'Descansé':'Descanso';
   document.getElementById('gym-body').style.display = DAY.gym.done?'block':'none';
   if(DAY.gym.type==='hibrido' || DAY.gym.type==='barre'){
     if(!DAY.gym.otro) DAY.gym.otro = DAY.gym.type==='barre' ? 'Barre' : 'Híbrido';
@@ -5767,11 +5757,7 @@ function bindDia(){
   });
 
   document.getElementById('gym-check').addEventListener('click',function(){
-    DAY.gym.done=!DAY.gym.done; if(DAY.gym.done) DAY.gym.rest=false; saveDay(); renderDia();
-  });
-  var _grBtn=document.getElementById('gym-rest');
-  if(_grBtn) _grBtn.addEventListener('click',function(){
-    DAY.gym.rest=!DAY.gym.rest; if(DAY.gym.rest) DAY.gym.done=false; saveDay(); renderDia();
+    DAY.gym.done=!DAY.gym.done; saveDay(); renderDia();
   });
   document.getElementById('gym-type').addEventListener('click',function(e){
     var b=e.target.closest('[data-gtype]'); if(!b) return;
@@ -7857,7 +7843,7 @@ function dayScore(dk){
   if(sleepOf(d)!=null) imp++;
   if(d.mood) imp++;
   if(d.skin&&(d.skin.am||d.skin.pm)) imp++;
-  if((parseInt(d.steps,10)||0)>=8000) imp++;
+  if(d.steps && parseInt(d.steps,10)>0) imp++;
   if(d.frapo&&(d.frapo.am||d.frapo.pm)) imp++;
   // hasta 3 opcionales (gym, suplementos, lectura)
   var op=0;
@@ -10073,7 +10059,7 @@ function rtDayLabel(day){
 }
 
 /* ---- PBs por ejercicio + material ---- */
-function rtPrKey(name, equip){ var n=normEx(name); return equip ? n+'§'+equip : n; }
+function rtPrKey(name, equip){ return equip ? name+'§'+equip : name; }
 function rtSplitKey(k){
   var i=k.indexOf('§');
   return i<0 ? {name:k, equip:''} : {name:k.slice(0,i), equip:k.slice(i+1)};
@@ -14520,20 +14506,6 @@ document.getElementById('ch-edit-back').addEventListener('click',function(){
 renderDayNav();
 refreshGreeting();
 renderDia();
-
-document.addEventListener('visibilitychange',function(){
-  if(document.hidden) return;
-  var newToday=dateKey(today());
-  if(newToday!==TODAY){ TODAY=newToday; CURRENT=TODAY; loadDay(); }
-  var aid=document.querySelector('.screen.on')&&document.querySelector('.screen.on').id;
-  if(!aid||aid==='sc-hoy') renderHoy();
-  if(aid==='sc-dia'){ renderDia(); renderDayNav(); }
-  if(aid==='sc-sem') renderSemana();
-  if(aid==='sc-prog') renderProgreso();
-});
-window.addEventListener('pageshow',function(e){
-  if(e.persisted){ TODAY=dateKey(today()); CURRENT=TODAY; loadDay(); renderDayNav(); renderDia(); renderHoy(); }
-});
 
 </script>
 </body>
