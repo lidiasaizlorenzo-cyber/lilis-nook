@@ -9383,11 +9383,31 @@ function rtLastEquip(name){
 }
 
 /* ---- sesión del día ---- */
-function rtSess(date){ return store.get('sess', date, null); }
+/* Repara sesiones guardadas con forma incompleta (ejercicio sin series, circuito sin rondas…) */
+function rtNormSess(s){
+  if(!s || typeof s!=='object') return null;
+  if(!Array.isArray(s.exercises)) s.exercises=[];
+  if(!Array.isArray(s.cardio)) s.cardio=[];
+  s.exercises=s.exercises.filter(function(ex){ return ex && typeof ex==='object'; });
+  s.exercises.forEach(function(ex){
+    if(ex.type==='circuit'){
+      if(!Array.isArray(ex.items)) ex.items=[];
+      var r=parseInt(ex.rounds,10)||3; ex.rounds=r;
+      ex.items.forEach(function(it){
+        if(!Array.isArray(it.sets)){ it.sets=[]; for(var k=0;k<r;k++) it.sets.push({reps:it.reps||'',kg:'',done:false}); }
+      });
+    } else if(!Array.isArray(ex.sets)){
+      var n=parseInt(ex.sets,10)||3; ex.sets=[];
+      for(var j=0;j<n;j++) ex.sets.push({reps:'',kg:'',done:false,plan:''});
+    }
+  });
+  return s;
+}
+function rtSess(date){ return rtNormSess(store.get('sess', date, null)); }
 function rtSaveSess(date, s){ store.set('sess', date, s); }
 
 /* ---- sesiones aparcadas: cada día de la rutina conserva lo que has metido al cambiar de día ---- */
-function rtDrafts(date){ var l=store.get('sessdrafts', date, null); return Array.isArray(l)?l:[]; }
+function rtDrafts(date){ var l=store.get('sessdrafts', date, null); return Array.isArray(l)? l.map(rtNormSess).filter(Boolean) : []; }
 function rtSaveDrafts(date,l){ if(l.length) store.set('sessdrafts',date,l); else store.del('sessdrafts',date); }
 function rtSessKey(s){ return s.libre ? 'libre' : (s.routineId+'.'+s.weekIdx+'.'+s.dayIdx); }
 function rtSessValida(s){ return !!s && (s.libre || !!rtById(s.routineId)); }
@@ -10125,12 +10145,22 @@ function renderEntrenoRecap(s, body){
 
 function rtSessTieneDatos(s){
   if(s.done || s.touched) return true;
-  for(var i=0;i<s.exercises.length;i++){
-    for(var j=0;j<s.exercises[i].sets.length;j++){
-      var st=s.exercises[i].sets[j];
+  function setsConDatos(sets, conPlan){
+    sets=sets||[];
+    for(var j=0;j<sets.length;j++){
+      var st=sets[j]||{};
       if(st.kg||st.done) return true;
-      if(st.reps && st.reps!==(st.plan||'')) return true;   // lo previsto no cuenta
+      if(conPlan && st.reps && st.reps!==(st.plan||'')) return true;   // lo previsto no cuenta
     }
+    return false;
+  }
+  var exs=s.exercises||[];
+  for(var i=0;i<exs.length;i++){
+    var ex=exs[i]||{};
+    if(ex.type==='circuit'){
+      var its=ex.items||[];
+      for(var k=0;k<its.length;k++){ if(setsConDatos(its[k]&&its[k].sets, false)) return true; }
+    } else if(setsConDatos(ex.sets, true)) return true;
   }
   for(var c=0;c<(s.cardio||[]).length;c++){
     var b=s.cardio[c], r=b.real||{};
@@ -10210,8 +10240,12 @@ function rtPlanDiff(s){
   var rt=rtById(s.routineId); if(!rt) return false;
   var day=rt.weeks[s.weekIdx] && rt.weeks[s.weekIdx].days[s.dayIdx];
   if(!day) return false;
-  var plan=(day.exercises||[]).map(function(e){return normEx(e.name);}).join('|');
-  var real=s.exercises.map(function(e){return normEx(e.name);}).join('|');
+  function firma(e){
+    if(e && e.type==='circuit') return 'circuito:'+(e.items||[]).map(function(it){return normEx(it&&it.name);}).join('+');
+    return normEx(e&&e.name);
+  }
+  var plan=(day.exercises||[]).map(firma).join('|');
+  var real=(s.exercises||[]).map(firma).join('|');
   return plan!==real;
 }
 function rtApplyToPlan(s){
@@ -13792,6 +13826,24 @@ safe('migrar-rutinas', function(){
 (function(){
   var srb=document.getElementById('sem-report-btn');
   if(srb) srb.addEventListener('click', function(){ safe('reporte', generateWeekReport); });
+})();
+
+/* Todas las funciones que pintan pantallas pasan por la red de seguridad:
+   si una falla, se anota en Diagnóstico y el botón que la llamó no deja la app colgada. */
+(function(){
+  var nombres=['renderHoy','renderDia','renderSemana','renderProgreso','renderHoyEntreno','renderDiaEntreno',
+    'renderRecordatorios','renderPendientes','renderInsights','renderGymBottomLink','renderEntreno','rtOpenToday','rtOpenSess',
+    'renderRepoRutinas','renderRutinaEdit','renderDiaConfig','renderRepoChallenges','openActiveCh','renderActiveCh',
+    'openChDetail','renderCasa','renderCasaPlan','renderCasaExpress','renderPlantas','renderHistorial','renderRefugio',
+    'renderRepoPeso','renderRepoMedidas','renderRepoFuerza','renderRepoLectura','renderRepoPatrones','renderExDetail',
+    'renderGarden','renderWkPlan','renderCustomSections','renderDiary','openHistDay','openHistWeek','renderCalendar'];
+  nombres.forEach(function(n){
+    var f=window[n];
+    if(typeof f!=='function' || f._seguro) return;
+    var g=function(){ var a=arguments, self=this; return safe(n, function(){ return f.apply(self,a); }); };
+    g._seguro=true;
+    try{ window[n]=g; }catch(e){}
+  });
 })();
 
 function arrancar(){
