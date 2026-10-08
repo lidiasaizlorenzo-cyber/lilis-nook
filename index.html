@@ -2344,10 +2344,16 @@ button{cursor:pointer}
               Gym
             </div>
           </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="gym-check" id="gym-check" aria-label="Marcar gym hecho">
             <span class="gc-ring-big"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
             <span class="gc-l" id="gym-check-l">Marcar hecho</span>
           </button>
+          <button class="gym-check" id="gym-rest" aria-label="Marcar descanso" style="border-color:var(--tierra-l,#D4B896);background:var(--crema)">
+            <span class="gc-ring-big" style="border-color:var(--tierra,#B07A6E)"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg></span>
+            <span class="gc-l" id="gym-rest-l">Descanso</span>
+          </button>
+          </div>
         </div>
 
         <div id="gym-body" class="gym-body" style="display:none">
@@ -2462,7 +2468,7 @@ button{cursor:pointer}
       </div>
 
       <!-- DIARIO con pregunta del día -->
-      <div class="panel" id="diary-panel">
+      <div class="panel" id="diary-panel" data-dia-sec="dia-sec-diario">
         <div class="section-label">
           <svg viewBox="0 0 24 24"><path d="M4 4h13a3 3 0 0 1 3 3v14H7a3 3 0 0 1-3-3z"/><path d="M9 8h7M9 12h7M9 16h4"/></svg>
           Diario
@@ -2633,7 +2639,7 @@ button{cursor:pointer}
 
       <!-- MODO MANUAL -->
       <div id="exp-mode-manual" style="display:none">
-        <div class="panel" data-dia-sec="dia-sec-medidas">
+        <div class="panel">
           <div class="exp-q">¿A qué hora empiezas?</div>
           <div class="exp-start-row">
             <input type="time" id="exp-start-time" class="exp-time-input" value="">
@@ -2641,7 +2647,7 @@ button{cursor:pointer}
           </div>
         </div>
 
-        <div class="panel" data-dia-sec="dia-sec-peso">
+        <div class="panel">
           <div class="exp-q">Tus zonas en orden</div>
           <div id="exp-manual-list"></div>
           <button class="add-line" id="exp-manual-add" style="margin-top:8px">
@@ -3049,799 +3055,6 @@ button{cursor:pointer}
     </div>
 
     <!-- SEMANA -->
-    <div class="screen"<div class="panel" data-dia-sec="dia-sec-diario"> <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px"><h1 class="bigtitle" style="margin-top:0">Mi día</h1><button class="rt-mini" onclick="openDiaSecEditor()">✎ Editar</button></div>
-
-      <!-- RECORDATORIOS -->
-      <div id="recordatorios"></div>
-
-      <!-- SUEÑO -->
-      <div class="panel" data-dia-sec="dia-sec-sueno">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-          Sueño
-          <span class="opt" id="sleep-avg">—</span>
-        </div>
-        <div class="sleep-step">
-          <button class="sl-btn" id="sleep-minus" aria-label="Menos"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
-          <div class="sl-mid">
-            <div class="sl-v" id="sleep-hours">—</div>
-            <div class="sl-k">horas dormidas</div>
-          </div>
-          <button class="sl-btn" id="sleep-plus" aria-label="Más"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-        </div>
-        <div class="sleep-total" id="sleep-total">Toca + para apuntar lo que has dormido</div>
-      </div>
-
-      <!-- CÓMO ME SIENTO -->
-      <div class="panel panel-tierra" id="mood-panel">
-        <div class="section-label" style="color:var(--tierra-d)">
-          <svg viewBox="0 0 24 24" style="stroke:var(--tierra-d)"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5C21 13 17 17 12 21z"/></svg>
-          ¿Cómo me siento hoy?
-          <span class="opt" id="mood-streak" style="color:var(--tierra-d)"></span>
-        </div>
-        <div class="mood-grid" id="mood-grid">
-          <button class="mood" data-mood="enérgica">Enérgica</button>
-          <button class="mood" data-mood="bien">Bien</button>
-          <button class="mood" data-mood="normal">Normal</button>
-          <button class="mood" data-mood="sensible">Sensible</button>
-          <button class="mood" data-mood="cansada">Cansada</button>
-          <button class="mood" data-mood="irascible">Irascible</button>
-        </div>
-        <textarea class="mood-note" id="in-moodnote" placeholder="Algo que quieras dejar escrito de hoy…"></textarea>
-      </div>
-
-      <!-- COMIDA -->
-      <div class="panel" data-dia-sec="dia-sec-comida">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M4 11h16v1a8 8 0 0 1-16 0z"/><path d="M7 7c.5-1 .5-2 0-3M11 7c.5-1 .5-2 0-3M15 7c.5-1 .5-2 0-3"/><path d="M3 20h18"/></svg>
-          Comida
-        </div>
-        <div id="meals-wrap"></div>
-        <div class="day-q" style="margin-top:6px">
-          <span class="dq-label">¿Comí como quería hoy?</span>
-          <div class="chip-row" id="meal-judge">
-            <button class="chip" data-judge="si">Sí</button>
-            <button class="chip" data-judge="más o menos">Más o menos</button>
-            <button class="chip" data-judge="no">No</button>
-          </div>
-        </div>
-        <div id="glovo-block" class="glovo-block" style="display:none">
-          <div class="gb-q">¿Pediste comida a domicilio o comprada?</div>
-          <div class="chip-row chip-row-grow" id="glovo-type">
-            <button class="chip chip-sm" data-glovo="domicilio">A domicilio (Glovo)</button>
-            <button class="chip chip-sm" data-glovo="comprada">Comprada fuera</button>
-          </div>
-          <div class="gb-cost" id="gb-cost" style="display:none">
-            <span class="row-l">¿Cuánto te costó?</span>
-            <div class="inline-input"><input type="text" inputmode="decimal" id="in-glovo-cost" placeholder="0"><span>€</span></div>
-          </div>
-          <div class="gb-mirror" id="gb-mirror"></div>
-        </div>
-        <div id="macros-block" class="macros-block" style="display:none">
-          <div class="mb-label">Detalle nutricional</div>
-          <div class="macros-grid">
-            <div class="macro-f"><label>Kcal</label><input type="text" inputmode="numeric" id="mac-kcal" placeholder="—"></div>
-            <div class="macro-f"><label>Prot (g)</label><input type="text" inputmode="numeric" id="mac-prot" placeholder="—"></div>
-            <div class="macro-f"><label>Carbs (g)</label><input type="text" inputmode="numeric" id="mac-carb" placeholder="—"></div>
-            <div class="macro-f"><label>Grasa (g)</label><input type="text" inputmode="numeric" id="mac-fat" placeholder="—"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- GYM -->
-      <div class="panel gym-panel" data-dia-sec="dia-sec-gym">
-        <div class="gym-top">
-          <div class="gym-top-l">
-            <div class="section-label" style="margin-bottom:4px">
-              <svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>
-              Gym
-            </div>
-          </div>
-          <button class="gym-check" id="gym-check" aria-label="Marcar gym hecho">
-            <span class="gc-ring-big"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
-            <span class="gc-l" id="gym-check-l">Marcar hecho</span>
-          </button>
-        </div>
-
-        <div id="gym-body" class="gym-body" style="display:none">
-          <div class="gym-fieldlabel">Tipo</div>
-          <div class="chip-row chip-row-grow" id="gym-type" style="margin-bottom:10px">
-            <button class="chip type-chip" data-gtype="cycling">Cycling</button>
-            <button class="chip type-chip" data-gtype="fuerza">Fuerza</button>
-            <button class="chip type-chip" data-gtype="otro">Otro</button>
-          </div>
-          <div id="gym-fuerza" class="gym-sub" style="display:none">
-            <div class="gym-fieldlabel" style="margin-top:8px">Área</div>
-            <div class="chip-row chip-row-grow" id="gym-fgroup">
-              <button class="chip cat-chip" data-fgroup="upper">Upper</button>
-              <button class="chip cat-chip" data-fgroup="lower">Lower</button>
-              <button class="chip cat-chip" data-fgroup="full body">Full body</button>
-            </div>
-          </div>
-          <div id="gym-otro" class="gym-sub" style="display:none">
-            <input type="text" class="gym-otro-input" id="in-otro" placeholder="¿Qué hiciste? (ej. barre, yoga…)" style="width:100%">
-          </div>
-        </div>
-
-        <div id="gym-bottom-link"></div>
-      </div>
-
-      <!-- SKINCARE -->
-      <div class="panel" data-dia-sec="dia-sec-skincare">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 3c-1 4-5 6-5 11a5 5 0 0 0 10 0c0-5-4-7-5-11z"/></svg>
-          Skincare
-        </div>
-        <div class="toggle-row">
-          <button class="toggle" data-skin="am"><span class="tg-box"></span><span class="tg-l">Rutina mañana</span></button>
-          <button class="toggle" data-skin="pm"><span class="tg-box"></span><span class="tg-l">Rutina noche</span></button>
-        </div>
-        <div class="skin-recur" id="skin-recur"></div>
-      </div>
-
-      <!-- PELO -->
-      <div class="panel" data-dia-sec="dia-sec-pelo">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M3 8.5c0-1.6 3.8-3 9-3s9 1.4 9 3v2.5H3z"/><path d="M5 11v6M8 11v7M11 11v7M14 11v7M17 11v6"/></svg>
-          Pelo
-        </div>
-        <div class="toggle-row">
-          <button class="toggle" data-pelo="masaje"><span class="tg-box"></span><span class="tg-l">Masaje capilar</span></button>
-          <button class="toggle" data-pelo="mascarilla"><span class="tg-box"></span><span class="tg-l">Mascarilla</span></button>
-        </div>
-        <div class="pelo-week" id="pelo-week"></div>
-        <div class="pelo-recur" id="pelo-recur"></div>
-      </div>
-
-      <!-- MÁS DEL DÍA -->
-      <div class="panel" data-dia-sec="dia-sec-pasos">
-        <div class="section-label" style="margin-bottom:6px">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 10v3l2 2M9 3h6"/></svg>
-          Más del día
-        </div>
-        <div class="row">
-          <span class="row-l">Pasos</span>
-          <div class="inline-input"><input type="text" inputmode="numeric" id="in-steps" placeholder="0"><span>pasos</span></div>
-        </div>
-        <div class="row">
-          <span class="row-l">¿Fui al baño?</span>
-          <div class="toggle-mini">
-            <button class="tmini" data-poop="si">Sí</button>
-            <button class="tmini" data-poop="no">No</button>
-          </div>
-        </div>
-        <div class="row">
-          <span class="row-l">Paseo de Frapo</span>
-          <div class="toggle-mini">
-            <button class="tmini" data-frapo="am">AM</button>
-            <button class="tmini" data-frapo="pm">PM</button>
-          </div>
-        </div>
-        <div class="row">
-          <span class="row-l">Suplementos</span>
-          <div class="toggle-mini">
-            <button class="tmini" data-supp="am">AM</button>
-            <button class="tmini" data-supp="pm">PM</button>
-          </div>
-        </div>
-        <div class="row">
-          <span class="row-l">Peso <span class="row-sub" style="display:inline">opcional</span></span>
-          <div class="inline-input"><input type="text" inputmode="decimal" id="in-weight" placeholder="—"><span>kg</span></div>
-        </div>
-        
-      </div>
-
-      <!-- MI MENTE -->
-      <div class="panel" data-dia-sec="dia-sec-mente">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-3-2-5-5-5-1 0-2 0-3 1 0 3 2 5 5 5 1 0 2 0 3-1z"/><path d="M12 14c0-3 2-5 5-5 1 0 2 0 3 1 0 3-2 5-5 5-1 0-2 0-3-1z"/></svg>
-          Mi mente
-        </div>
-        <button class="toggle" data-read="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy leí</span></button>
-        <button class="toggle" data-studylang="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy estudié idioma</span></button>
-        <button class="toggle" data-studycourse="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy estudié curso</span></button>
-        <button class="toggle" data-crochet="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy hice crochet</span></button>
-        <button class="toggle" data-enrich="1" style="width:100%"><span class="tg-box"></span><span class="tg-l">Hice algo que me enriquece</span></button>
-        <div class="enrich-note" id="enrich-note" style="display:none">
-          <input type="text" id="in-enrich" placeholder="¿qué fue? (opcional)">
-        </div>
-        <div class="rrss-block">
-          <div class="rrss-head">
-            <span class="row-l">Tiempo en redes hoy</span>
-            <div class="inline-input"><input type="text" inputmode="numeric" id="in-rrss" placeholder="0"><span>min</span></div>
-          </div>
-          <div class="rrss-mirror" id="rrss-mirror"></div>
-        </div>
-      </div>
-
-      <!-- DIARIO con pregunta del día -->
-      <div class="panel" id="diary-panel">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M4 4h13a3 3 0 0 1 3 3v14H7a3 3 0 0 1-3-3z"/><path d="M9 8h7M9 12h7M9 16h4"/></svg>
-          Diario
-        </div>
-        <div class="diary-q" id="diary-q">—</div>
-        <textarea class="diary-input" id="diary-input" placeholder="lo que quieras, sin filtro"></textarea>
-        <div class="diary-foot">
-          <button class="diary-shuffle" id="diary-shuffle">
-            <svg viewBox="0 0 24 24"><path d="M16 3l5 5-5 5M21 8H8M8 21l-5-5 5-5M3 16h13"/></svg>
-            otra pregunta
-          </button>
-          <span class="diary-note">puedes volver atrás y leerte</span>
-        </div>
-      </div>
-
-      <!-- Apartados personalizados (creados por el usuario) -->
-      <div id="custom-sections"></div>
-      <button class="add-section-btn" id="add-section-btn">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Añadir apartado
-      </button>
-
-      <button class="vault-link" id="dia-casa" style="background:#EEF3F2;border-color:#D8E2DF;margin-top:4px">
-        <span class="vl-l" style="color:#4F6A65">
-          <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h4v-6h6v6h4V10"/></svg>
-          <span>Casa · limpieza al día</span>
-        </span>
-        <span class="vl-r" style="color:#4F6A65">entrar</span>
-      </button>
-
-      <div class="day-actions">
-        <button class="clear-day" id="clear-day">
-          <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-          Borrar los datos de este día
-        </button>
-      </div>
-
-      <div class="panel bare" style="text-align:center;padding:4px 0 6px">
-        <p style="font-size:12px;color:var(--tinta-3);font-style:italic;font-family:var(--serif)">se guarda solo, día a día</p>
-      </div>
-    </div>
-
-    <!-- CASA: home (plan + express) -->
-    <div class="screen" id="sc-casa">
-      <button class="subback" id="casa-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi día</button>
-      <h1 class="bigtitle" style="margin-top:6px">Casa</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Tu hogar al día sin agobios.</p>
-
-      <!-- QUÉ TOCA AHORA -->
-      <div class="panel">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
-          Hoy te toca
-          <span class="opt" id="casa-due-count"></span>
-        </div>
-        <div id="casa-due-list"></div>
-      </div>
-
-      <!-- ESTA SEMANA -->
-      <div class="panel">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M16 2v4M8 2v4"/></svg>
-          Esta semana
-        </div>
-        <div id="casa-week-body"></div>
-        <div class="casa-week-foot">Miércoles y viernes son tus días fuertes.</div>
-      </div>
-
-      <!-- ACCIONES PRINCIPALES -->
-      <div class="casa-actions">
-        <button class="casa-action" id="casa-go-express">
-          <div class="ca-ic"><svg viewBox="0 0 24 24"><path d="M12 2v6l3-3M12 8l-3-3M3 12h6l-3-3M3 12l3 3M21 12h-6l3-3M21 12l-3 3M12 22v-6l3 3M12 16l-3 3"/></svg></div>
-          <div class="ca-tx">
-            <div class="ca-t">Limpieza express</div>
-            <div class="ca-s">por tiempo, con cronómetro</div>
-          </div>
-          <svg class="ca-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-        <button class="casa-action" id="casa-go-plantas">
-          <div class="ca-ic"><svg viewBox="0 0 24 24"><path d="M12 22V11M12 11c0-3-2-5-5-5 0 3 2 5 5 5zM12 11c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6z"/></svg></div>
-          <div class="ca-tx">
-            <div class="ca-t">Plantas</div>
-            <div class="ca-s" id="casa-plantas-sub">cada cuánto riegas cada una</div>
-          </div>
-          <svg class="ca-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-        <button class="casa-action" id="casa-go-plan">
-          <div class="ca-ic"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16M8 15h2M14 15h2M8 18h2"/></svg></div>
-          <div class="ca-tx">
-            <div class="ca-t">Plan completo</div>
-            <div class="ca-s">semanal · mensual · trimestral · semestral · anual</div>
-          </div>
-          <svg class="ca-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-      </div>
-
-      <!-- RACHA -->
-      <div class="panel" id="casa-streak-panel">
-        <div class="casa-streak-row">
-          <div class="casa-streak-ic">
-            <svg viewBox="0 0 24 24"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-5 5-10z"/></svg>
-          </div>
-          <div class="casa-streak-tx">
-            <div class="casa-streak-big" id="casa-streak-big">0</div>
-            <div class="casa-streak-sub" id="casa-streak-sub">semanas seguidas con todo lo semanal</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CASA: plan completo -->
-    <div class="screen" id="sc-casa-plan">
-      <button class="subback" id="casa-plan-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Casa</button>
-      <h1 class="bigtitle" style="margin-top:6px">Plan completo</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Tickea cuando lo hagas. Se vuelve a marcar pendiente según su frecuencia.</p>
-      <div id="casa-plan-body"></div>
-      <button class="add-line" id="casa-plan-add" style="margin-top:12px">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Añadir tarea
-      </button>
-      <button class="pb-link" id="casa-plan-reset" style="margin-top:14px;width:100%;text-align:center;padding:10px;border:1px dashed var(--linea);background:none;border-radius:99px;color:var(--tinta-3);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">restaurar tareas predeterminadas</button>
-    </div>
-
-    <!-- CASA: express builder -->
-    <div class="screen" id="sc-casa-express">
-      <button class="subback" id="casa-exp-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Casa</button>
-      <h1 class="bigtitle" style="margin-top:6px">Limpieza express</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Elige cómo quieres montar la sesión.</p>
-
-      <!-- Selector de modo -->
-      <div class="exp-mode-tabs">
-        <button class="exp-mode-tab on" data-mode="auto">Reparto automático</button>
-        <button class="exp-mode-tab" data-mode="manual">Yo lo monto</button>
-      </div>
-
-      <!-- MODO AUTO -->
-      <div id="exp-mode-auto">
-        <div class="panel">
-          <div class="exp-q">¿Cuánto tiempo tienes?</div>
-          <div class="exp-mins" id="exp-mins-row">
-            <button class="exp-chip" data-mins="20">20 min</button>
-            <button class="exp-chip on" data-mins="30">30 min</button>
-            <button class="exp-chip" data-mins="45">45 min</button>
-            <button class="exp-chip" data-mins="60">1 h</button>
-            <button class="exp-chip" data-mins="90">1 h 30</button>
-            <button class="exp-chip" data-mins="120">2 h</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="exp-q">¿Qué zonas?</div>
-          <div class="exp-zones" id="exp-zones-row"></div>
-          <button class="add-line" id="exp-zone-add" style="margin-top:8px">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            Añadir zona
-          </button>
-        </div>
-
-        <div class="panel" id="exp-preview" style="display:none">
-          <div class="exp-q">Tu sesión</div>
-          <div id="exp-preview-body"></div>
-          <button class="exp-start" id="exp-start">
-            <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg>
-            Empezar
-          </button>
-        </div>
-      </div>
-
-      <!-- MODO MANUAL -->
-      <div id="exp-mode-manual" style="display:none">
-        <div class="panel" data-dia-sec="dia-sec-medidas">
-          <div class="exp-q">¿A qué hora empiezas?</div>
-          <div class="exp-start-row">
-            <input type="time" id="exp-start-time" class="exp-time-input" value="">
-            <button class="exp-chip" id="exp-start-now">Ahora</button>
-          </div>
-        </div>
-
-        <div class="panel" data-dia-sec="dia-sec-peso">
-          <div class="exp-q">Tus zonas en orden</div>
-          <div id="exp-manual-list"></div>
-          <button class="add-line" id="exp-manual-add" style="margin-top:8px">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            Añadir zona
-          </button>
-        </div>
-
-        <div class="panel" id="exp-manual-preview" style="display:none">
-          <div class="exp-q">Tu sesión</div>
-          <div id="exp-manual-preview-body"></div>
-          <button class="exp-start" id="exp-manual-start">
-            <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg>
-            Empezar
-          </button>
-        </div>
-      </div>
-
-      <!-- últimas sesiones (compartido) -->
-      <div class="panel" id="exp-history-panel" style="display:none">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
-          Sesiones anteriores
-        </div>
-        <div id="exp-history"></div>
-      </div>
-    </div>
-
-    <!-- CASA: cronómetro de sesión -->
-    <div class="screen" id="sc-casa-run">
-      <div class="run-wrap">
-        <div class="run-zone" id="run-zone">—</div>
-        <div class="run-time" id="run-time">00:00</div>
-        <div class="run-next" id="run-next"></div>
-        <div class="run-progress"><div class="run-progress-fill" id="run-progress-fill"></div></div>
-        <div class="run-controls">
-          <button class="run-skip" id="run-skip">Saltar zona</button>
-          <button class="run-pause" id="run-pause">Pausa</button>
-          <button class="run-stop" id="run-stop">Terminar</button>
-        </div>
-        <div class="run-list" id="run-list"></div>
-      </div>
-    </div>
-
-    <!-- PROGRESO (índice de repositorios) -->
-    <div class="screen" id="sc-prog">
-      <h1 class="bigtitle" style="margin-top:14px">Mi progreso</h1>
-
-      <!-- PESO: gráfica directa + ver más -->
-      <div class="prog-block" id="prog-peso-block">
-        <div class="prog-block-head">
-          <div class="prog-block-title">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M7 15l4-5 3 3 5-7"/></svg></div>
-            <div>
-              <div class="rcr-label">Peso</div>
-              <div class="prog-block-big" id="prog-peso-now">—</div>
-            </div>
-          </div>
-          <div class="prog-block-trend" id="prog-peso-trend"></div>
-        </div>
-        <div class="prog-range-tabs">
-          <button class="prt on" data-prange="W">Semana</button>
-          <button class="prt" data-prange="M">Mes</button>
-          <button class="prt" data-prange="Y">Año</button>
-          <button class="prt" data-prange="ALL">Todo</button>
-        </div>
-        <div class="prog-chart" id="prog-peso-chart"></div>
-        <div class="prog-baseline" id="prog-peso-baseline"></div>
-        <div class="prog-peso-msg" id="prog-peso-msg"></div>
-        <div class="prog-peso-safe" id="prog-peso-safe" style="display:none"></div>
-        <button class="prog-more" data-repo="sc-repo-peso">Historial completo <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-      </div>
-
-      <!-- MEDIDAS: última toma + ver más -->
-      <div class="prog-block" id="prog-medidas-block">
-        <div class="prog-block-head">
-          <div class="prog-block-title">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/></svg></div>
-            <div>
-              <div class="rcr-label">Medidas</div>
-              <div class="prog-block-sub" id="prog-medidas-when">sin tomas</div>
-            </div>
-          </div>
-        </div>
-        <div class="prog-md-grid" id="prog-medidas-grid"></div>
-        <div class="prog-baseline" id="prog-medidas-baseline"></div>
-        <button class="prog-more" data-repo="sc-repo-medidas">Historial completo <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-      </div>
-
-      <!-- Pareja: Fuerza + Lectura (lectura con barra) -->
-      <div class="repo-grid">
-        <button class="repo-card-rich" data-repo="sc-repo-fuerza">
-          <div class="rcr-head">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg></div>
-            <div class="rcr-label">Fuerza</div>
-          </div>
-          <div class="rcr-big" id="rcr-fuerza-big">—</div>
-          <div class="rcr-sub" id="rcr-fuerza-sub">sin PRs aún</div>
-        </button>
-
-        <button class="repo-card-rich" data-repo="sc-repo-lectura">
-          <div class="rcr-head">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></div>
-            <div class="rcr-label">Lectura</div>
-          </div>
-          <div class="rcr-big" id="rcr-lectura-big">—</div>
-          <div class="rcr-bar"><div class="rcr-bar-fill" id="rcr-lectura-fill" style="width:0%"></div></div>
-          <div class="rcr-sub" id="rcr-lectura-sub">año en curso</div>
-        </button>
-      </div>
-
-      <button class="repo-card-wide-rich" data-repo="sc-repo-patrones">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></div>
-          <div>
-            <div class="rcr-label">Patrones y datos</div>
-            <div class="rcw-sub">cómo se relaciona todo lo tuyo</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-      <button class="repo-card-wide-rich" data-repo="sc-repo-historial">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M8 17V9M13 17V5M18 17v-6"/></svg></div>
-          <div>
-            <div class="rcr-label">Historial completo</div>
-            <div class="rcw-sub" id="repo-hist-s">todo lo que registres, navegable</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-
-      <button class="repo-card-wide-rich" data-repo="sc-repo-rutinas">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg></div>
-          <div>
-            <div class="rcr-label">Mis rutinas</div>
-            <div class="rcw-sub" id="repo-rt-s">tus rutinas de gym</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-            <button class="repo-card-wide-rich rcw-ch" data-repo="sc-repo-challenges">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 0 12 0V3H6zM12 15v6M8 21h8"/></svg></div>
-          <div>
-            <div class="rcr-label">Mis challenges</div>
-            <div class="rcw-sub" id="repo-ch-s">repositorio de retos</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-      <!-- TU JARDÍN -->
-      <div class="panel" style="margin-top:6px">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 22V8M12 8c0-3-2-5-5-5 0 3 2 5 5 5zM12 8c0-3 2-5 5-5 0 3-2 5-5 5z"/></svg>
-          Tu jardín
-        </div>
-        <p class="panel-intro" id="garden-intro" style="margin-bottom:14px">—</p>
-        <div class="garden-grid" id="garden-grid"></div>
-        <div class="garden-progress" id="garden-progress" style="display:none">
-          <div class="gp-bar"><div class="gp-fill" id="gp-fill"></div></div>
-          <div class="gp-tx" id="gp-tx">—</div>
-        </div>
-      </div>
-
-      <div class="panel bare" style="text-align:center;padding:4px 0 8px">
-        <p style="font-size:12px;color:var(--tinta-3);font-style:italic;font-family:var(--serif)">tu yo es tu mayor proyecto</p>
-      </div>
-    </div>
-
-    <!-- REPO: PESO -->
-    <div class="screen" id="sc-repo-peso">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Historial de peso</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Todos tus registros</div>
-        <p class="panel-intro" style="margin-bottom:14px">Para añadir un peso nuevo, anótalo en <b>Mi día</b>. Aquí ves toda tu historia.</p>
-        <div id="pz-history"></div>
-      </div>
-    </div>
-
-    <!-- REPO: MEDIDAS -->
-    <div class="screen" id="sc-repo-medidas">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Medidas</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Tomar medidas de hoy
-          <span class="opt" id="md-lastdate"></span>
-        </div>
-        <div class="md-form" id="md-form"></div>
-        <button class="btn btn-primary" id="md-save" style="margin-top:12px">Guardar medidas de hoy</button>
-      </div>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Evolución</div>
-        <p class="md-hint" id="md-hint" style="display:none">Desliza la tabla para ver más fechas</p>
-        <div class="md-evo-wrap"><div id="md-evo"></div></div>
-        <p class="md-note">La flecha compara con la toma anterior · el valor de antes va en cursiva</p>
-      </div>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Tomas registradas</div>
-        <p class="panel-intro" style="margin-bottom:14px">Toca una toma para marcarla como punto de partida.</p>
-        <div id="md-takes-list"></div>
-      </div>
-    </div>
-
-    <!-- REPO: FUERZA -->
-    <div class="screen" id="sc-repo-fuerza">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Fuerza y PRs</h1>
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-        <input type="text" id="pr-search" placeholder="Buscar ejercicio…">
-      </div>
-      <div id="pr-library"></div>
-      <button class="add-line" id="pr-add" style="margin-top:4px">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Añadir ejercicio
-      </button>
-    </div>
-
-    <!-- Sub: detalle de ejercicio -->
-    <div class="screen" id="sc-exdetail">
-      <button class="subback" id="exdetail-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Fuerza y PRs</button>
-      <h1 class="bigtitle" id="exdetail-title" style="margin-top:6px">Ejercicio</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Tu progreso</div>
-        <div class="evo-chart-card"><div id="ex-chart"></div></div>
-        <div id="ex-records"></div>
-      </div>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Registrar marca de hoy</div>
-        <div class="ex-newrec">
-          <div class="ex-f"><label>Reps</label><input type="text" inputmode="numeric" id="nr-reps" placeholder="10"></div>
-          <div class="ex-f"><label>Kg</label><input type="text" inputmode="decimal" id="nr-kg" placeholder="25"></div>
-          <div class="ex-f"><label>Seg</label><input type="text" inputmode="numeric" id="nr-sec" placeholder="–"></div>
-        </div>
-        <button class="btn btn-primary" id="nr-save" style="margin-top:12px">Guardar marca</button>
-      </div>
-      <div class="day-actions">
-        <button class="clear-day" id="ex-cat-change" style="color:var(--verde-d)"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg>Cambiar categoría</button>
-        <button class="clear-day" id="ex-delete"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>Eliminar este ejercicio</button>
-      </div>
-    </div>
-
-    <!-- REPO: LECTURA -->
-    <div class="screen" id="sc-repo-lectura">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Lectura</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>Este año
-          <button class="opt-edit" id="books-goal-edit">objetivo: <b id="books-goal">12</b> ›</button>
-        </div>
-        <div class="books-ring-wrap">
-          <div class="ring" style="width:96px;height:96px">
-            <svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="38" fill="none" stroke="var(--verde-l)" stroke-width="8"/><circle id="books-arc" cx="48" cy="48" r="38" fill="none" stroke="var(--tierra)" stroke-width="8" stroke-linecap="round" stroke-dasharray="238.7" stroke-dashoffset="238.7" transform="rotate(-90 48 48)"/></svg>
-            <div class="lab"><b id="books-count">0</b><s id="books-of">de 12</s></div>
-          </div>
-          <div class="books-side">
-            <button class="books-btn" id="books-minus">−</button>
-            <span class="books-lbl">libros leídos</span>
-            <button class="books-btn" id="books-plus">+</button>
-          </div>
-        </div>
-        <div class="proj-msg" id="books-proj"></div>
-      </div>
-    </div>
-
-    <!-- REPO: PATRONES -->
-    <div class="screen" id="sc-repo-patrones">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Patrones y datos</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Lo que tus datos dicen de ti, sin que tengas que rellenar nada.</p>
-      <div id="patrones-body"></div>
-    </div>
-
-    <!-- REPO: HISTORIAL -->
-    <div class="screen" id="sc-repo-historial">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Historial</h1>
-      <div class="hist-tabs">
-        <button class="hist-tab on" data-htab="analisis">Análisis</button>
-        <button class="hist-tab" data-htab="archivo">Archivo</button>
-        <button class="hist-tab" data-htab="refugio">Refugio</button>
-      </div>
-      <div id="hist-body"></div>
-    </div>
-
-    <!-- Sub: detalle/edición de un día del historial -->
-    <div class="screen" id="sc-hist-day">
-      <button class="subback" id="histday-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Historial</button>
-      <h1 class="bigtitle" id="histday-title" style="margin-top:6px;font-size:24px">Día</h1>
-      <div class="panel" style="margin-bottom:14px">
-        <p class="panel-intro" style="margin:0">Aquí ves y editas todo lo de ese día. Para editarlo a fondo, ábrelo en "Mi día".</p>
-        <button class="btn btn-primary" id="histday-open" style="margin-top:13px;width:100%">Abrir este día en Mi día</button>
-      </div>
-      <div id="histday-body"></div>
-    </div>
-
-    <!-- PLANTAS DE CASA -->
-    <div class="screen" id="sc-plantas">
-      <button class="subback" id="plantas-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Casa</button>
-      <h1 class="bigtitle" style="margin-top:6px">Plantas</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Cada planta o grupo con su ritmo de riego. Cuando toque, te lo recuerdo en Mi día.</p>
-      <div id="plantas-list"></div>
-      <button class="add-line" id="plantas-add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Añadir planta o grupo</button>
-
-      <div class="rt-lab">Finanzas</div>
-      <div class="panel">
-        <p class="panel-intro" style="margin:0 0 12px">Te aviso una vez por semana para revisarlas, y el último día del mes para preparar el siguiente.</p>
-        <div class="row"><span class="row-l">Día del repaso semanal</span></div>
-        <div class="rt-eqrow" id="fin-dow"></div>
-      </div>
-    </div>
-
-    <!-- REPO: MIS RUTINAS -->
-    <div class="screen" id="sc-repo-rutinas">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Mis rutinas</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Tus rutinas de gym. La activa es la que te propone el entreno de cada día.</p>
-      <div id="rt-list"></div>
-      <button class="add-line" id="rt-new" style="margin-top:4px">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Crear una rutina
-      </button>
-      <div id="rt-arch"></div>
-    </div>
-
-    <!-- EDITAR RUTINA -->
-    <div class="screen" id="sc-rutina-edit">
-      <button class="subback" id="rt-edit-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis rutinas</button>
-      <h1 class="bigtitle" style="margin-top:6px" id="rt-edit-title">Rutina</h1>
-      <div id="rt-edit-body"></div>
-    </div>
-
-    <!-- CONFIGURAR DÍA DE LA RUTINA -->
-    <div class="screen" id="sc-dia-config">
-      <button class="subback" id="rt-cfg-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Editar rutina</button>
-      <h1 class="bigtitle" style="margin-top:6px" id="rt-cfg-title">Día</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px" id="rt-cfg-sub">—</p>
-      <div id="rt-cfg-body"></div>
-    </div>
-
-    <!-- ENTRENO DEL DÍA -->
-    <div class="screen" id="sc-entreno">
-      <button class="subback" id="rt-ent-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> <span id="rt-ent-backtx">Hoy</span></button>
-      <div id="rt-ent-body"></div>
-    </div>
-
-    <!-- REPO: CHALLENGES (sub-app rosa-coral) -->
-    <div class="screen ch-app" id="sc-repo-challenges">
-      <button class="subback ch-subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle ch-title" style="margin-top:6px">Mis challenges</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Repositorio de retos. Cada uno con su duración, su ritmo y su sentido.</p>
-      <div id="ch-active-host"></div>
-
-      <!-- Mis challenges personalizados -->
-      <div class="ch-cat-section" id="ch-custom-section">
-        <div class="ch-catalog-t">Tuyos</div>
-        <div id="ch-custom-list"></div>
-        <button class="ch-custom-create" id="ch-custom-create">
-          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          Crear el tuyo
-        </button>
-      </div>
-
-      <div class="ch-catalog-t">Catálogo</div>
-      <div id="ch-catalog"></div>
-      <div class="ch-cat-section" id="ch-hist-section" style="display:none">
-        <div class="ch-catalog-t">Histórico</div>
-        <div id="ch-history"></div>
-      </div>
-    </div>
-
-    <!-- Pantalla challenge activo -->
-    <div class="screen ch-app" id="sc-ch-active">
-      <button class="subback ch-subback" id="ch-active-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis challenges</button>
-      <div id="ch-active-body"></div>
-    </div>
-
-    <!-- Pantalla detalle catálogo (antes de aceptar) -->
-    <div class="screen ch-app" id="sc-ch-detail">
-      <button class="subback ch-subback" id="ch-detail-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis challenges</button>
-      <div id="ch-detail-body"></div>
-    </div>
-
-    <!-- Editor de challenge custom -->
-    <div class="screen ch-app" id="sc-ch-edit">
-      <button class="subback ch-subback" id="ch-edit-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis challenges</button>
-      <h1 class="bigtitle ch-title" style="margin-top:6px" id="ch-edit-title">Crear challenge</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Diséñalo a tu medida. Solo aparece en "Tuyos".</p>
-      <div id="ch-edit-body"></div>
-    </div>
-
-    <!-- Editor de apartado personalizado de Mi día -->
-    <div class="screen" id="sc-section-edit">
-      <button class="subback" id="section-edit-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi día</button>
-      <h1 class="bigtitle" style="margin-top:10px" id="section-edit-title">Nuevo apartado</h1>
-      <p class="panel-intro" style="margin:-4px 0 16px">Hazlo a tu medida. Aparecerá en Mi día.</p>
-      <div id="section-edit-body"></div>
-    </div>
-
-    <!-- SEMANA -->
     <div class="screen" id="sc-sem">
       <button class="subback" id="sem-histback" style="display:none"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Volver al historial</button>
       <h1 class="bigtitle" style="margin-top:14px">Mi semana</h1>
@@ -4054,6 +3267,14 @@ button{cursor:pointer}
       </div>
 
       <div class="set-group">
+        <div class="set-grouplabel">Diagnóstico</div>
+        <div class="set-item">
+          <div><div class="si-l">Errores de la app</div><div class="si-s">si algo no carga, aquí se ve qué parte falló</div></div>
+          <button id="btn-diag">Ver</button>
+        </div>
+      </div>
+
+      <div class="set-group">
         <div class="set-grouplabel">Datos</div>
         <div class="set-item danger">
           <div><div class="si-l">Borrar todo</div><div class="si-s">empezar de cero (no se puede deshacer)</div></div>
@@ -4086,9 +3307,9 @@ button{cursor:pointer}
   <div class="sheet-mask" id="confirm-mask">
     <div class="sheet" id="confirm-sheet">
       <div class="sheet-grip"></div>
-      <div class="sheet-head"><div class="sheet-title" id="confirm-title">¿Seguro?</div></div>
-      <p id="confirm-body" style="font-size:14px;color:var(--tinta-2);line-height:1.6;margin-bottom:6px"></p>
-      <div class="cal-foot">
+      <div class="sheet-head" id="confirm-head"><div class="sheet-title" id="confirm-title">¿Seguro?</div></div>
+      <div id="confirm-body" style="font-size:14px;color:var(--tinta-2);line-height:1.6;margin-bottom:6px"></div>
+      <div class="cal-foot" id="confirm-foot">
         <button class="btn btn-ghost" id="confirm-no">Cancelar</button>
         <button class="btn" id="confirm-yes" style="background:#A4564A;color:#fff">Borrar</button>
       </div>
@@ -4179,6 +3400,22 @@ button{cursor:pointer}
 
 <script>
 "use strict";
+
+/* =========================================================
+   RED DE SEGURIDAD — si una parte falla, el resto de la app sigue viva
+========================================================= */
+var APP_ERRORS=[];
+function reportErr(where, e){
+  var msg=(e&&e.message)?e.message:String(e);
+  APP_ERRORS.push({where:where, msg:msg, stack:(e&&e.stack)?String(e.stack).split('\n').slice(0,3).join(' | '):'', at:new Date().toISOString()});
+  if(APP_ERRORS.length>30) APP_ERRORS.shift();
+  try{ console.error('['+where+']', e); }catch(_){}
+}
+function safe(where, fn){
+  try{ return fn(); }catch(e){ reportErr(where, e); }
+}
+window.addEventListener('error',function(ev){ reportErr('global', ev.error||ev.message); });
+window.addEventListener('unhandledrejection',function(ev){ reportErr('promise', ev.reason); });
 
 /* =========================================================
    CIMIENTOS — almacenamiento, fechas, navegación
@@ -4507,11 +3744,9 @@ function intel_refugePattern(){
 function renderHoy(){
   var h=new Date().getHours();
   var hoy=intel_today();
-  if(typeof renderPendientes==='function') renderPendientes();
-  if(typeof renderInsights==='function') renderInsights();
-  if(typeof renderHoyEntreno==='function') renderHoyEntreno();
-  var _srb=document.getElementById('sem-report-btn');
-  if(_srb) _srb.addEventListener('click', generateWeekReport);
+  safe('pendientes', renderPendientes);
+  safe('insights', renderInsights);
+  safe('hoy-entreno', renderHoyEntreno);
 
   // saludo
   var s = h<6?'Buenas noches':h<13?'Buenos días':h<20?'Buenas tardes':'Buenas noches';
@@ -4650,10 +3885,10 @@ function gotoDay(k){ CURRENT=k; renderDayNav(); rerenderActive(); }
 
 /* hook para que cada tanda futura re-renderice su pantalla al cambiar de día */
 function rerenderActive(){
-  if(typeof renderDia==='function') renderDia();
-  if(typeof renderProgreso==='function' && document.getElementById('sc-prog').classList.contains('on')) renderProgreso();
-  if(typeof renderSemana==='function' && document.getElementById('sc-sem').classList.contains('on')) renderSemana();
-  if(typeof renderHoy==='function' && document.getElementById('sc-hoy').classList.contains('on')) renderHoy();
+  safe('dia', renderDia);
+  if(document.getElementById('sc-prog').classList.contains('on')) safe('progreso', renderProgreso);
+  if(document.getElementById('sc-sem').classList.contains('on')) safe('semana', renderSemana);
+  if(document.getElementById('sc-hoy').classList.contains('on')) safe('hoy', renderHoy);
 }
 
 /* ---- Calendario ---- */
@@ -4757,7 +3992,16 @@ function closeSheet(id){ document.getElementById(id).classList.remove('on'); }
 
 /* confirmación propia (confirm() nativo no funciona en iframes) */
 var _confirmCb=null;
+/* Hoja de opciones propias (sin los botones Cancelar/Borrar de la confirmación) */
+function menuSheet(html){
+  _confirmCb=null;
+  document.getElementById('confirm-head').style.display='none';
+  document.getElementById('confirm-foot').style.display='none';
+  document.getElementById('confirm-body').innerHTML=html;
+}
 function confirmSheet(title, body, yesLabel, cb){
+  document.getElementById('confirm-head').style.display='';
+  document.getElementById('confirm-foot').style.display='';
   document.getElementById('confirm-title').textContent=title;
   document.getElementById('confirm-body').textContent=body;
   var yb=document.getElementById('confirm-yes');
@@ -4836,6 +4080,17 @@ document.getElementById('btn-macros').addEventListener('click',function(){
   toast(on?'Modo detallado activado':'Modo detallado apagado');
   if(typeof renderMacros==='function') renderMacros();
 });
+document.getElementById('btn-diag').addEventListener('click',function(){
+  closeSheet('set-mask');
+  var list=APP_ERRORS.slice().reverse();
+  var html='<div class="sheet-title" style="margin-bottom:10px">Errores de la app</div>'+
+    (list.length? list.map(function(e){
+      return '<div style="font-size:12px;border-bottom:1px solid var(--linea);padding:8px 0"><b>'+escapeHtml(e.where)+'</b> · '+escapeHtml(e.msg)+'<div style="color:var(--tinta-3);font-size:11px">'+escapeHtml(e.at.slice(11,19))+'</div></div>';
+    }).join('') : '<p style="font-size:13px;color:var(--tinta-3);padding:8px 0">Ningún error en esta sesión.</p>')+
+    '<button class="btn btn-ghost" id="diag-close" style="margin-top:14px;width:100%">Cerrar</button>';
+  menuSheet(html); openSheet('confirm-mask');
+  document.getElementById('diag-close').onclick=function(){ closeSheet('confirm-mask'); };
+});
 document.getElementById('btn-wipe').addEventListener('click',function(){
   confirmSheet('Borrar todo','Se borrará TODO y no se puede deshacer.','Borrar todo',function(){
     store.wipe(); toast('Todo borrado'); setTimeout(function(){ location.reload(); },800);
@@ -4861,11 +4116,11 @@ function showScreen(id, isRefuge){
     for(var t=0;t<tabs.length;t++) tabs[t].classList.toggle('on', tabs[t].getAttribute('data-go')===marcar);
   }
   if(id==='sc-entreno'){ var tb=document.querySelectorAll('.tab'); for(var q=0;q<tb.length;q++) tb[q].classList.toggle('on', tb[q].getAttribute('data-go')===prevTab); }
-  if(id==='sc-prog' && typeof renderProgreso==='function') renderProgreso();
-  if(id==='sc-sem' && typeof renderSemana==='function') renderSemana();
-  if(id==='sc-ref' && typeof renderRefugio==='function') renderRefugio();
-  if(id==='sc-hoy' && typeof renderHoy==='function') renderHoy();
-  if(id==='sc-dia'){ if(typeof renderDiaEntreno==='function') renderDiaEntreno(); if(typeof renderRecordatorios==='function') renderRecordatorios(); }
+  if(id==='sc-prog') safe('progreso', renderProgreso);
+  if(id==='sc-sem') safe('semana', renderSemana);
+  if(id==='sc-ref') safe('refugio', renderRefugio);
+  if(id==='sc-hoy') safe('hoy', renderHoy);
+  if(id==='sc-dia'){ safe('dia-entreno', renderDiaEntreno); safe('recordatorios', renderRecordatorios); }
 }
 var tabBtns=document.querySelectorAll('.tab');
 for(var ti=0;ti<tabBtns.length;ti++){
@@ -5076,11 +4331,13 @@ function renderMeals(){
   });
   document.getElementById('meals-wrap').innerHTML=html;
   document.querySelectorAll('[data-meal]').forEach(function(ta){
-    autoGrow(ta);
     ta.addEventListener('input',function(){
       DAY.meals[this.getAttribute('data-meal')]=this.value; autoGrow(this); saveDay();
     });
   });
+  setTimeout(function(){
+    document.querySelectorAll('[data-meal]').forEach(function(ta){ autoGrow(ta); });
+  },0);
 }
 function monthGlovo(){
   var d=parseKey(CURRENT), y=d.getFullYear(), m=d.getMonth();
@@ -5660,15 +4917,17 @@ function renderDia(){
   autoGrow(document.getElementById('in-moodnote'));
   document.getElementById('mood-streak').textContent=moodStreak();
 
-  renderMeals();
+  safe('comidas', renderMeals);
   setChips('meal-judge','judge',DAY.mealJudge);
-  renderGlovo();
-  renderMacros();
+  safe('glovo', renderGlovo);
+  safe('macros', renderMacros);
 
   var gc=document.getElementById('gym-check');
   gc.classList.toggle('done',DAY.gym.done);
 
   var _gcl=document.getElementById('gym-check-l'); if(_gcl) _gcl.textContent=DAY.gym.done?'Hecho':'Marcar hecho';
+  var _gr=document.getElementById('gym-rest'); if(_gr) _gr.classList.toggle('done',!!DAY.gym.rest);
+  var _grl=document.getElementById('gym-rest-l'); if(_grl) _grl.textContent=DAY.gym.rest?'Descansé':'Descanso';
   document.getElementById('gym-body').style.display = DAY.gym.done?'block':'none';
   if(DAY.gym.type==='hibrido' || DAY.gym.type==='barre'){
     if(!DAY.gym.otro) DAY.gym.otro = DAY.gym.type==='barre' ? 'Barre' : 'Híbrido';
@@ -5679,13 +4938,13 @@ function renderDia(){
   document.getElementById('gym-otro').style.display   = DAY.gym.type==='otro'?'block':'none';
   setChips('gym-fgroup','fgroup',DAY.gym.fgroup);
   document.getElementById('in-otro').value=DAY.gym.otro||'';
-  gymWeekHint();
-  if(typeof renderGymBottomLink==='function') renderGymBottomLink();
-  if(typeof renderRecordatorios==='function') renderRecordatorios();
+  safe('gym-hint', gymWeekHint);
+  safe('gym-link', renderGymBottomLink);
+  safe('recordatorios', renderRecordatorios);
 
-  renderSkin();
-  renderPelo();
-  if(typeof renderCustomSections==='function') renderCustomSections();
+  safe('skin', renderSkin);
+  safe('pelo', renderPelo);
+  safe('apartados', renderCustomSections);
 
   document.getElementById('in-steps').value=DAY.steps||'';
   document.getElementById('in-weight').value=DAY.weight||'';
@@ -5703,9 +4962,10 @@ function renderDia(){
   setToggle('[data-enrich="1"]',DAY.enrich);
   document.getElementById('enrich-note').style.display=DAY.enrich?'block':'none';
   document.getElementById('in-enrich').value=DAY.enrichNote||'';
-  renderRrss();
-  if(typeof renderDiary==='function') renderDiary();
-  if(typeof refreshAllPlanGymPanels==='function') refreshAllPlanGymPanels();
+  safe('redes', renderRrss);
+  safe('diario', renderDiary);
+  safe('plan-gym', refreshAllPlanGymPanels);
+  safe('secciones', applyDiaSecs);
 }
 
 /* ---- Listeners ---- */
@@ -5757,7 +5017,11 @@ function bindDia(){
   });
 
   document.getElementById('gym-check').addEventListener('click',function(){
-    DAY.gym.done=!DAY.gym.done; saveDay(); renderDia();
+    DAY.gym.done=!DAY.gym.done; if(DAY.gym.done) DAY.gym.rest=false; saveDay(); renderDia();
+  });
+  var _grBtn=document.getElementById('gym-rest');
+  if(_grBtn) _grBtn.addEventListener('click',function(){
+    DAY.gym.rest=!DAY.gym.rest; if(DAY.gym.rest) DAY.gym.done=false; saveDay(); renderDia();
   });
   document.getElementById('gym-type').addEventListener('click',function(e){
     var b=e.target.closest('[data-gtype]'); if(!b) return;
@@ -6146,7 +5410,7 @@ function openWeightDaySheet(dk,w){
     '<button class="btn btn-primary" id="wds-bl" style="margin-bottom:8px">'+escapeHtml(blLabel)+'</button>'+
     '<button class="btn" id="wds-rm" style="background:#FDECEA;color:#B71C1C;margin-bottom:8px">Eliminar este peso</button>'+
     '<button class="btn btn-ghost" id="wds-cancel">Cancelar</button>';
-  document.getElementById('confirm-body').innerHTML=html;
+  menuSheet(html);
   openSheet('confirm-mask');
   document.getElementById('wds-cancel').onclick=function(){ closeSheet('confirm-mask'); };
   document.getElementById('wds-bl').onclick=function(){
@@ -7706,7 +6970,7 @@ function bindProgreso(){
     var html='<div class="sheet-title">Cambiar categoría</div>'+
       cats.map(function(c){ return '<button class="btn btn-primary" data-cat-pick="'+c.k+'" style="margin-bottom:8px">'+c.l+'</button>'; }).join('')+
       '<button class="btn btn-ghost" id="cat-cancel">Cancelar</button>';
-    document.getElementById('confirm-body').innerHTML=html;
+    menuSheet(html);
     openSheet('confirm-mask');
     document.getElementById('cat-cancel').onclick=function(){ closeSheet('confirm-mask'); };
     document.querySelectorAll('[data-cat-pick]').forEach(function(b){
@@ -7843,7 +7107,7 @@ function dayScore(dk){
   if(sleepOf(d)!=null) imp++;
   if(d.mood) imp++;
   if(d.skin&&(d.skin.am||d.skin.pm)) imp++;
-  if(d.steps && parseInt(d.steps,10)>0) imp++;
+  if((parseInt(d.steps,10)||0)>=8000) imp++;
   if(d.frapo&&(d.frapo.am||d.frapo.pm)) imp++;
   // hasta 3 opcionales (gym, suplementos, lectura)
   var op=0;
@@ -8274,11 +7538,24 @@ function renderWkPlan(){
 }
 
 /* ---- Semana calendario del plan ---- */
+/* Acepta 2026-10-08, 08/10/2026, 8-10-26… y devuelve siempre AAAA-MM-DD (o null) */
+function rtNormDate(v){
+  if(!v) return null;
+  var s=String(v).trim(), m;
+  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1]+'-'+pad(+m[2])+'-'+pad(+m[3]);
+  if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/))){
+    var y=+m[3]; if(y<100) y+=2000;
+    var mo=+m[2], d=+m[1];
+    if(mo>=1&&mo<=12&&d>=1&&d<=31) return y+'-'+pad(mo)+'-'+pad(d);
+  }
+  return null;
+}
 function rtPlanWeekForToday(rt){
-  if(!rt||!rt.startDate) return null;
-  var start=parseKey(rt.startDate), cur=parseKey(TODAY);
+  if(!rt||!rt.weeks||!rt.weeks.length) return null;
+  var sd=rtNormDate(rt.startDate); if(!sd) return null;
+  var start=parseKey(sd), cur=parseKey(TODAY);
   var diff=Math.floor((cur-start)/86400000);
-  if(diff<0) return null;
+  if(isNaN(diff)||diff<0) return null;
   var wi=Math.floor(diff/7);
   var monday=new Date(start); monday.setDate(start.getDate()+wi*7); monday.setHours(12,0,0,0);
   return {weekIdx:Math.min(wi,rt.weeks.length-1), mondayKey:dateKey(monday), overflow:wi>=rt.weeks.length};
@@ -8289,15 +7566,16 @@ function rtSetWeekPref(rid,mondayKey,val){ store.set('wkpref',rtWeekPrefKey(rid,
 
 /* Semana efectiva (respetando decisión "repetir") */
 function rtEffectiveWeek(rt){
-  if(!rt) return 0;
-  var ctx=rtPlanWeekForToday(rt); if(!ctx) return null;
-  var pref=rtGetWeekPref(rt.id,ctx.mondayKey);
-  return pref!==null ? pref : ctx.weekIdx;
+  if(!rt||!rt.weeks||!rt.weeks.length) return 0;
+  var ctx=rtPlanWeekForToday(rt); if(!ctx) return 0;
+  var pref=parseInt(rtGetWeekPref(rt.id,ctx.mondayKey),10);
+  var w=isNaN(pref)? ctx.weekIdx : pref;
+  return Math.max(0, Math.min(rt.weeks.length-1, w));
 }
 
 /* ¿Esta semana el usuario aún no ha decidido? */
 function rtNeedWeekAsk(rt){
-  if(!rt||!rt.startDate) return false;
+  if(!rt||!rtNormDate(rt.startDate)) return false;
   var ctx=rtPlanWeekForToday(rt); if(!ctx||ctx.weekIdx===0) return false;
   return rtGetWeekPref(rt.id,ctx.mondayKey)===null;
 }
@@ -8400,8 +7678,6 @@ var DIA_SECS=[
   {id:'dia-sec-skincare',label:'Skincare'},
   {id:'dia-sec-pelo',  label:'Pelo'},
   {id:'dia-sec-pasos', label:'Pasos'},
-  {id:'dia-sec-peso',  label:'Peso'},
-  {id:'dia-sec-medidas',label:'Medidas'},
   {id:'dia-sec-mente', label:'Mi mente'},
   {id:'dia-sec-diario',label:'Diario'},
 ];
@@ -8428,7 +7704,7 @@ function openDiaSecEditor(){
       '</button></div>';
   });
   html+='<button class="btn btn-primary" id="dia-sec-done" style="margin-top:18px">Hecho</button>';
-  document.getElementById('confirm-body').innerHTML=html;
+  menuSheet(html);
   openSheet('confirm-mask');
   document.getElementById('dia-sec-done').onclick=function(){ closeSheet('confirm-mask'); applyDiaSecs(); };
   document.querySelectorAll('.dia-sec-tog').forEach(function(b){
@@ -8924,7 +8200,7 @@ function casaAddTaskPrompt(){
     var html='<div class="sheet-title">¿Con qué frecuencia?</div>'+
       freqs.map(function(f){ return '<button class="btn btn-primary" data-casa-freq="'+f.k+'" style="margin-bottom:8px">'+f.l+'</button>'; }).join('')+
       '<button class="btn btn-ghost" id="casa-freq-cancel">Cancelar</button>';
-    document.getElementById('confirm-body').innerHTML=html;
+    menuSheet(html);
     openSheet('confirm-mask');
     document.getElementById('casa-freq-cancel').onclick=function(){ closeSheet('confirm-mask'); };
     document.querySelectorAll('[data-casa-freq]').forEach(function(b){
@@ -10032,19 +9308,19 @@ function rtWeekDone(rt,w){
 /* Siguiente día pendiente de la rutina activa */
 function rtNext(){
   var rt=rtActive(); if(!rt) return null;
-  var startW=0;
-  if(rt.startDate){
-    var ew=rtEffectiveWeek(rt);
-    if(ew===null) return null;
-    startW=ew;
-  }
+  if(!Array.isArray(rt.weeks)||!rt.weeks.length) return null;
+  var conFecha=!!rtNormDate(rt.startDate);
+  var startW=conFecha? rtEffectiveWeek(rt) : 0;
   for(var w=startW; w<rt.weeks.length; w++){
-    for(var d=0; d<rt.weeks[w].days.length; d++){
+    var dias=(rt.weeks[w]&&rt.weeks[w].days)||[];
+    for(var d=0; d<dias.length; d++){
       if(!rtDayDone(rt.id,w,d)) return {rt:rt, w:w, d:d};
     }
-    if(w===startW) break; // en la semana efectiva, si todos hechos → allDone
+    if(conFecha) break; // con fecha: solo cuenta la semana del calendario
   }
-  return {rt:rt, w:startW, d:rt.weeks[startW].days.length-1, allDone:true};
+  var ult=(rt.weeks[startW]&&rt.weeks[startW].days)||[];
+  if(!ult.length) return null;
+  return {rt:rt, w:startW, d:ult.length-1, allDone:true};
 }
 function rtDayLabel(day){
   if(!day || !day.type) return 'Sin configurar';
@@ -10059,7 +9335,7 @@ function rtDayLabel(day){
 }
 
 /* ---- PBs por ejercicio + material ---- */
-function rtPrKey(name, equip){ return equip ? name+'§'+equip : name; }
+function rtPrKey(name, equip){ var n=normEx(name); return equip ? n+'§'+equip : n; }
 function rtSplitKey(k){
   var i=k.indexOf('§');
   return i<0 ? {name:k, equip:''} : {name:k.slice(0,i), equip:k.slice(i+1)};
@@ -10207,7 +9483,7 @@ function rtHoyCardHTML(){
     var _esDescanso=_plan&&_plan.gymByDay&&_planArr!==null&&_planArr.length===0;
     if(!_esDescanso){
       nx=rtNext();
-      if(nx){ rt=nx.rt; w=nx.w; d=nx.d; day=rt.weeks[w].days[d]; }
+      if(nx){ rt=nx.rt; w=nx.w; d=nx.d; day=(rt.weeks[w]&&rt.weeks[w].days[d])||null; }
     }
   }
   var hecho = s && s.done;
@@ -10678,7 +9954,7 @@ function rtBindEntreno(s){
         return '<button class="btn btn-primary rt-mach-pick" data-mach="'+m.k+'" style="margin-bottom:8px">'+m.l+'</button>';
       }).join('')+
       '<button class="btn btn-ghost" id="rt-mach-cancel">Cancelar</button>';
-    document.getElementById('confirm-body').innerHTML=html;
+    menuSheet(html);
     openSheet('confirm-mask');
     document.getElementById('rt-mach-cancel').onclick=function(){ closeSheet('confirm-mask'); };
     document.querySelectorAll('.rt-mach-pick').forEach(function(b){
@@ -14503,9 +13779,61 @@ document.getElementById('ch-edit-back').addEventListener('click',function(){
   document.head.appendChild(st);
 })();
 
-renderDayNav();
-refreshGreeting();
-renderDia();
+/* ---- Arranque ---- */
+/* normaliza fechas de inicio antiguas de las rutinas (ej. 08/10/2026) */
+safe('migrar-rutinas', function(){
+  var l=rtAll(), ch=false;
+  l.forEach(function(r){
+    if(r && r.startDate){ var n=rtNormDate(r.startDate); if(n!==r.startDate){ r.startDate=n; ch=true; } }
+    if(r && !Array.isArray(r.weeks)){ r.weeks=[]; ch=true; }
+  });
+  if(ch) rtSaveAll(l);
+});
+(function(){
+  var srb=document.getElementById('sem-report-btn');
+  if(srb) srb.addEventListener('click', function(){ safe('reporte', generateWeekReport); });
+})();
+
+function arrancar(){
+  safe('nav', renderDayNav);
+  safe('dia', renderDia);
+  safe('hoy', renderHoy);
+}
+arrancar();
+
+/* Al volver a la app (iOS deja la página congelada en memoria):
+   solo se refresca si ha cambiado el día o si la página venía de caché. */
+var _reactTimer=null;
+function reactivarApp(force){
+  clearTimeout(_reactTimer);
+  _reactTimer=setTimeout(function(){
+    var nuevoHoy=dateKey(today());
+    var cambioDia = nuevoHoy!==TODAY;
+    if(!cambioDia && !force) return;
+    if(cambioDia){
+      var estabaEnHoy = (CURRENT===TODAY);
+      TODAY=nuevoHoy;
+      if(estabaEnHoy) CURRENT=TODAY;
+    }
+    var on=document.querySelector('.screen.on');
+    var aid=on? on.id : 'sc-hoy';
+    // no repintar mientras se escribe o hay una hoja abierta
+    var act=document.activeElement;
+    if(act && /INPUT|TEXTAREA|SELECT/.test(act.tagName)) return;
+    if(document.querySelector('.sheet-mask.on')) return;
+    safe('nav', renderDayNav);
+    if(aid==='sc-hoy') safe('hoy', renderHoy);
+    else if(aid==='sc-dia') safe('dia', renderDia);
+    else if(aid==='sc-sem') safe('semana', renderSemana);
+    else if(aid==='sc-prog') safe('progreso', renderProgreso);
+  }, 120);
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible') reactivarApp(false);
+});
+window.addEventListener('pageshow',function(e){
+  if(e && e.persisted) reactivarApp(true);
+});
 
 </script>
 </body>
