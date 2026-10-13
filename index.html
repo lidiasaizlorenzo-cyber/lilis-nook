@@ -3148,7 +3148,8 @@ button{cursor:pointer}
       <div class="panel bare" style="text-align:center;padding:4px 0 8px">
         <p style="font-size:12px;color:var(--tinta-3);font-style:italic;font-family:var(--serif)">una semana cada vez</p>
       </div>
-      <button class="add-line" id="sem-report-btn" style="margin:0 0 20px"><svg viewBox="0 0 24 24"><path d="M12 15V3M9 12l3 3 3-3M5 20h14"/></svg>Descargar resumen de la semana</button>
+      <button class="add-line" id="sem-report-btn" style="margin:0 0 10px"><svg viewBox="0 0 24 24"><path d="M12 15V3M9 12l3 3 3-3M5 20h14"/></svg>Descargar resumen de la semana</button>
+      <button class="add-line" id="sem-train-btn" style="margin:0 0 20px"><svg viewBox="0 0 24 24"><path d="M12 15V3M9 12l3 3 3-3M5 20h14"/></svg>Descargar entrenos de la semana</button>
     </div>
 
     <!-- REFUGIO -->
@@ -7581,10 +7582,8 @@ function rtNeedWeekAsk(rt){
 }
 
 function generateWeekReport(){
-  var d=new Date(parseKey(TODAY));
-  var dow=d.getDay()===0?6:d.getDay()-1;
-  var monday=new Date(d); monday.setDate(d.getDate()-dow);
-  var lines=['RESUMEN DE LA SEMANA',''];
+  var monday=weekStart(WK_OFFSET||0);
+  var lines=['RESUMEN DE LA SEMANA · '+rtRangoSemana(monday),''];
   var totalSleep=0, totalSteps=0, totalKcal=0, totalProt=0, dias=0, diasKcal=0;
   var pesos=[], comidas=[];
   var DNAMES=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
@@ -7659,12 +7658,126 @@ function generateWeekReport(){
   }
   lines.push('Días entrenados: '+diasGym+' de 7');
   if(comidas.length){ lines.push(''); lines.push('── COMIDAS ──'); comidas.forEach(function(c){lines.push(c);}); }
-  var txt=lines.join('\n');
-  var blob=new Blob([txt],{type:'text/plain'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='semana-'+dateKey(monday)+'.txt';
-  a.click();
+  descargarTexto('semana-'+dateKey(monday)+'.txt', lines.join('\n'), 'Resumen de la semana');
+}
+
+/* Descarga (o comparte en el móvil) un archivo de texto */
+function descargarTexto(nombre, txt, titulo){
+  var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  try{
+    var file=new File([blob], nombre, {type:'text/plain'});
+    if(navigator.canShare && navigator.share && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:titulo||nombre}).catch(function(e){
+        if(e && e.name!=='AbortError') bajar();
+      });
+      return;
+    }
+  }catch(e){}
+  bajar();
+  function bajar(){
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download=nombre; a.style.display='none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+  }
+}
+function rtRangoSemana(monday){
+  var dom=new Date(monday); dom.setDate(monday.getDate()+6);
+  var a=monday.getDate()+(monday.getMonth()!==dom.getMonth()?' '+MON_SHORT[monday.getMonth()]:'');
+  return a+'–'+dom.getDate()+' '+MON_SHORT[dom.getMonth()]+' '+dom.getFullYear();
+}
+
+/* ---- Entrenos de la semana en texto, para la entrenadora ---- */
+function rtSesionesDeFecha(dk){
+  var l=[], vistos={};
+  var cur=rtSess(dk);
+  if(cur && rtSessTieneDatos(cur)){ l.push(cur); vistos[rtSessKey(cur)]=1; }
+  rtDrafts(dk).forEach(function(x){
+    if(rtSessTieneDatos(x) && !vistos[rtSessKey(x)]){ l.push(x); vistos[rtSessKey(x)]=1; }
+  });
+  return l;
+}
+function rtSeriesTexto(sets){
+  var hechas=(sets||[]).filter(function(st){ return st && st.done; });
+  if(!hechas.length) hechas=(sets||[]).filter(function(st){ return st && (st.kg || (st.reps && st.reps!==(st.plan||''))); });
+  return hechas.map(function(st,i){
+    var r=st.reps||st.plan||'?';
+    return '   Serie '+(i+1)+': '+r+' reps'+(st.kg?' × '+String(st.kg).replace('.',',')+' kg':' (sin peso)');
+  });
+}
+function generateTrainingReport(){
+  var monday=weekStart(WK_OFFSET||0);
+  var DN=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  var out=['ENTRENOS DE LA SEMANA · '+rtRangoSemana(monday),''], total=0;
+  for(var i=0;i<7;i++){
+    var dia=new Date(monday); dia.setDate(monday.getDate()+i);
+    var dk=dateKey(dia);
+    var ses=rtSesionesDeFecha(dk);
+    var dd=store.get('day',dk,null);
+    if(!ses.length){
+      if(dd && dd.gym && dd.gym.done){
+        var TL={fuerza:'Fuerza',cycling:'Cycling',cardio:'Cardio',clase:'Clase',hibrido:'Híbrido',barre:'Barre'};
+        var tl=dd.gym.type==='otro'?(dd.gym.otro||'Entreno'):(TL[dd.gym.type]||'Entreno');
+        if(dd.gym.type==='fuerza' && dd.gym.fgroup) tl+=' '+dd.gym.fgroup;
+        out.push('■ '+DN[i]+' '+dia.getDate()+' '+MON_SHORT[dia.getMonth()]+' — '+tl+' (sin detalle de series)','');
+        total++;
+      }
+      continue;
+    }
+    ses.forEach(function(x){
+      total++;
+      var rt=x.routineId?rtById(x.routineId):null;
+      var dayCfg=(rt&&rt.weeks[x.weekIdx]&&rt.weeks[x.weekIdx].days[x.dayIdx])||x;
+      var titulo=x.libre?'Entreno libre':rtDayLabel(dayCfg);
+      var cab='■ '+DN[i]+' '+dia.getDate()+' '+MON_SHORT[dia.getMonth()]+' — '+titulo;
+      if(rt) cab+=' ('+rt.name+' · Semana '+(x.weekIdx+1)+' · Día '+(x.dayIdx+1)+')';
+      if(!x.done) cab+=' [sin terminar]';
+      out.push(cab);
+      if(x.startedAt && x.endedAt){ var m=Math.round((x.endedAt-x.startedAt)/60000); if(m>0) out.push('Duración: '+m+' min'); }
+      if(x.type==='clase') out.push('Clase'+(x.done?' hecha':''));
+      var n=0;
+      (x.exercises||[]).forEach(function(ex){
+        if(ex.type==='circuit'){
+          var bloques=[];
+          (ex.items||[]).forEach(function(it){
+            var ls=rtSeriesTexto(it.sets);
+            if(ls.length) bloques.push({n:it.name,eq:it.equip,ls:ls,nota:it.nota});
+          });
+          if(!bloques.length) return;
+          out.push('• Circuito ('+(ex.rounds||'')+' rondas):');
+          bloques.forEach(function(b){
+            n++;
+            out.push('  - '+(b.n||'Ejercicio')+(b.eq?' ['+b.eq+']':''));
+            b.ls.forEach(function(l){ out.push('  '+l.replace('Serie','Ronda')); });
+            if(b.nota) out.push('     Nota: '+b.nota);
+          });
+        } else {
+          var ls=rtSeriesTexto(ex.sets);
+          if(!ls.length) return;
+          n++;
+          out.push('• '+(ex.name||'Ejercicio')+(ex.equip?' ['+ex.equip+']':''));
+          ls.forEach(function(l){ out.push(l); });
+          if(ex.nota) out.push('     Nota: '+ex.nota);
+        }
+      });
+      var cards=(x.cardio||[]).map(function(b){
+        var r=b.real||{}, p=[];
+        if(b.hechas) p.push(b.hechas+(b.series?' de '+b.series:'')+' series');
+        if(r.tiempo) p.push(r.tiempo+' min');
+        if(r.km) p.push(r.km+' km');
+        if(r.vel) p.push(r.vel+' km/h');
+        if(r.incl) p.push('inclinación '+r.incl);
+        return p.length? '• Cardio '+(b.machine||'')+(b.mode?' ('+b.mode+')':'')+': '+p.join(', ') : '';
+      }).filter(Boolean);
+      cards.forEach(function(c){ out.push(c); });
+      if(!n && !cards.length && x.type!=='clase') out.push('(sin series apuntadas)');
+      out.push('');
+    });
+  }
+  if(!total){ toast('No hay entrenos apuntados esa semana'); return; }
+  out.push('Total: '+total+' entreno'+(total===1?'':'s'));
+  descargarTexto('entrenos-'+dateKey(monday)+'.txt', out.join('\n'), 'Entrenos de la semana');
 }
 function wkDayArr(val){
   // normaliza string o array → array (retrocompatible)
@@ -8596,6 +8709,13 @@ function renderSemana(){
     WK_OFFSET===-1?'semana pasada':Math.abs(WK_OFFSET)+' semanas atrás';
   // dejar avanzar al futuro: permitido hasta 4 semanas vista
   document.getElementById('wk-next').classList.toggle('disabled', WK_OFFSET>=4);
+  (function(){
+    var rango=s.getDate()+' '+MON_SHORT[s.getMonth()]+' – '+e.getDate()+' '+MON_SHORT[e.getMonth()];
+    var svg='<svg viewBox="0 0 24 24"><path d="M12 15V3M9 12l3 3 3-3M5 20h14"/></svg>';
+    var b1=document.getElementById('sem-report-btn'), b2=document.getElementById('sem-train-btn');
+    if(b1) b1.innerHTML=svg+'Descargar resumen · '+rango;
+    if(b2) b2.innerHTML=svg+'Descargar entrenos · '+rango;
+  })();
 
   // plan de la semana
   if(typeof renderWkPlan==='function') renderWkPlan();
@@ -9587,6 +9707,7 @@ function rtOpenToday(from){
   rtOpenSess(from);
 }
 function rtOpenSess(from){
+  RT_PEEK=null;
   RT_BACK=from||'sc-hoy';
   var tx=RT_BACK==='sc-dia'?'Mi día':(RT_BACK==='sc-repo-rutinas'?'Mis rutinas':'Hoy');
   document.getElementById('rt-ent-backtx').textContent=tx;
@@ -9611,6 +9732,170 @@ function rtTimerStart(){ if(RT_TIMER.running) return; RT_TIMER.running=true; RT_
 function rtTimerStop(){ if(!RT_TIMER.running) return; RT_TIMER.acc+=Date.now()-RT_TIMER.start; RT_TIMER.running=false; }
 function rtTimerReset(){ RT_TIMER.running=false; RT_TIMER.acc=0; clearInterval(RT_TIMER.id); RT_TIMER.id=null; var el=document.getElementById('rt-timer-disp'); if(el) el.textContent='00:00'; }
 
+/* ---- Consultar otras semanas/días sin tocar el entreno de hoy ---- */
+var RT_PEEK=null;   // {w,d} cuando estás mirando un día distinto al que entrenas hoy
+
+/* Busca lo que registraste para ese día de la rutina (en cualquier fecha) */
+function rtFindPast(rid,w,d){
+  var key=rid+'.'+w+'.'+d, cand=[];
+  function mirar(date){
+    var a=rtSess(date);
+    if(a && !a.libre && rtSessKey(a)===key && date!==CURRENT) cand.push({date:date,s:a});
+    rtDrafts(date).forEach(function(x){ if(!x.libre && rtSessKey(x)===key) cand.push({date:date,s:x}); });
+  }
+  var doneDate=rtDayDone(rid,w,d);
+  if(doneDate && /^\d{4}-\d{2}-\d{2}$/.test(doneDate)) mirar(doneDate);
+  if(!cand.length){
+    var pre1=NS+'sess.', pre2=NS+'sessdrafts.', fechas={};
+    store.allKeys().forEach(function(k){
+      var f=null;
+      if(k.indexOf(pre1)===0) f=k.slice(pre1.length);
+      else if(k.indexOf(pre2)===0) f=k.slice(pre2.length);
+      if(f && /^\d{4}-\d{2}-\d{2}$/.test(f)) fechas[f]=1;
+    });
+    Object.keys(fechas).sort().forEach(mirar);
+  }
+  cand=cand.filter(function(c){ return rtSessTieneDatos(c.s); });
+  var best=null;
+  cand.forEach(function(c){
+    if(!best) best=c;
+    else if(c.s.done && !best.s.done) best=c;
+    else if(c.s.done===best.s.done && c.date>best.date) best=c;
+  });
+  return {found:best, doneDate:doneDate||null};
+}
+function rtFechaBonita(k){
+  var d=parseKey(k);
+  var h=humanLabel(k);
+  var base=DOW_FULL[d.getDay()]+' '+d.getDate()+' '+MON_SHORT[d.getMonth()];
+  return (h==='Hoy'||h==='Ayer'||h==='Mañana')? h.toLowerCase()+' ('+base+')' : base;
+}
+function rtPeekHTML(rt, w, d, hoyS){
+  var day=rt.weeks[w].days[d];
+  var res=rtFindPast(rt.id,w,d), f=res.found;
+  var html='';
+  html+='<div class="rt-week-chip">'+
+    '<div><div class="rt-wc-lbl">'+escapeHtml(rt.name)+'</div>'+
+    '<div class="rt-wc-name">Semana '+(w+1)+'</div></div>'+
+    '<div class="rt-wc-arrows">'+
+      '<button class="rt-wc-arr" data-sw-wprev aria-label="Semana anterior"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>'+
+      '<button class="rt-wc-arr" data-sw-wnext aria-label="Semana siguiente"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>'+
+    '</div></div>';
+  html+='<div class="rt-days-cards">';
+  rt.weeks[w].days.forEach(function(dd,i){
+    var isC=i===d, isDone=rtDayDone(rt.id,w,i);
+    var _dck=isDone?'<path d="M5 12l5 5L20 7"/>':'';
+    html+='<div class="rt-dc'+(isC?' cur':'')+(isDone?' done':'')+'" data-sw-d="'+i+'">'+
+      '<div class="rt-dc-num">D'+(i+1)+'</div>'+
+      '<div class="rt-dc-ic"><svg viewBox="0 0 24 24">'+_dck+'</svg></div></div>';
+  });
+  html+='</div>';
+
+  var label=rtDayLabel(day);
+  var estado;
+  if(f) estado=(f.s.done?'Hecho el ':'Empezado el ')+rtFechaBonita(f.date);
+  else if(res.doneDate) estado='Marcado como hecho el '+rtFechaBonita(res.doneDate)+' · sin series guardadas';
+  else estado='Aún no lo has hecho · esto es lo planificado';
+  html+='<div class="rt-ent-head"><div class="rt-eh-name">'+escapeHtml(label)+
+    ((f&&f.s.done)||res.doneDate?' <span class="rt-done-pill">Hecho</span>':'')+'</div>'+
+    '<div class="rt-eh-meta">'+escapeHtml(estado)+'</div></div>';
+
+  function fila(st){
+    var r=st.reps||st.plan||'', kg=st.kg||'';
+    var tx=(r?r+' reps':'—')+(kg?' · '+kg+' kg':'');
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--linea);font-size:14px">'+
+      '<span>'+escapeHtml(tx)+'</span><span style="color:'+(st.done?'var(--verde-d)':'var(--tinta-3)')+';font-weight:700">'+(st.done?'✓':'')+'</span></div>';
+  }
+  function bloqueEj(nombre, equip, sets, extra){
+    var h='<div class="panel" style="padding:14px 16px;margin-bottom:10px">'+
+      '<div style="font-weight:700;font-size:15px;margin-bottom:6px">'+escapeHtml(nombre||'Ejercicio')+
+      (equip?' <span style="font-weight:500;color:var(--tinta-3);font-size:12px">· '+escapeHtml(equip)+'</span>':'')+'</div>';
+    (sets||[]).forEach(function(st,j){ h+=fila(st||{}); });
+    if(extra) h+='<div style="font-size:12.5px;color:var(--tinta-3);margin-top:6px">'+escapeHtml(extra)+'</div>';
+    return h+'</div>';
+  }
+
+  if(f){
+    var ses=f.s;
+    if(ses.type==='clase'){
+      html+='<div class="panel"><p class="rt-empty" style="padding:4px 0">Clase'+(ses.done?' hecha.':'.')+'</p></div>';
+    }
+    (ses.exercises||[]).forEach(function(ex){
+      if(ex.type==='circuit'){
+        html+='<div class="rt-lab">Circuito · '+(ex.rounds||'')+' rondas</div>';
+        (ex.items||[]).forEach(function(it){ html+=bloqueEj(it.name, it.equip, it.sets, it.nota); });
+      } else html+=bloqueEj(ex.name, ex.equip, ex.sets, ex.nota);
+    });
+    if((ses.cardio||[]).length){
+      html+='<div class="rt-lab">Cardio</div>';
+      ses.cardio.forEach(function(b){
+        var r=b.real||{}, partes=[];
+        if(b.hechas) partes.push(b.hechas+(b.series?' de '+b.series:'')+' series');
+        if(r.tiempo) partes.push(r.tiempo+' min');
+        if(r.km) partes.push(r.km+' km');
+        if(r.vel) partes.push(r.vel+' km/h');
+        if(r.incl) partes.push('incl. '+r.incl);
+        html+='<div class="panel" style="padding:14px 16px;margin-bottom:10px"><div style="font-weight:700;font-size:15px">'+
+          escapeHtml((b.machine||'Cardio')+(b.mode?' · '+b.mode:''))+'</div>'+
+          '<div style="font-size:13.5px;color:var(--tinta-2);margin-top:4px">'+escapeHtml(partes.join(' · ')||'sin datos apuntados')+'</div></div>';
+      });
+    }
+  } else {
+    if(day.type==='clase') html+='<div class="panel"><p class="rt-empty" style="padding:4px 0">Día de clase: se marca y listo.</p></div>';
+    (day.exercises||[]).forEach(function(ex){
+      if(ex.type==='circuit'){
+        html+='<div class="rt-lab">Circuito · '+(ex.rounds||3)+' rondas</div>';
+        (ex.items||[]).forEach(function(it){ html+=bloqueEj(it.name, it.equip, [{plan:it.reps||''}], it.nota); });
+      } else html+=bloqueEj(ex.name, ex.equip, rtExSets(ex).map(function(x){return {plan:x.reps};}), ex.nota);
+    });
+    if((day.cardio||[]).length){
+      html+='<div class="rt-lab">Cardio</div>';
+      day.cardio.forEach(function(b){
+        var partes=[]; if(b.series) partes.push(b.series+' series'); if(b.tiempo) partes.push(b.tiempo+' min'); if(b.km) partes.push(b.km+' km'); if(b.vel) partes.push(b.vel+' km/h');
+        html+='<div class="panel" style="padding:14px 16px;margin-bottom:10px"><div style="font-weight:700;font-size:15px">'+
+          escapeHtml((b.machine||'Cardio')+(b.mode?' · '+b.mode:''))+'</div>'+
+          '<div style="font-size:13.5px;color:var(--tinta-2);margin-top:4px">'+escapeHtml(partes.join(' · '))+'</div></div>';
+      });
+    }
+    if(!(day.exercises||[]).length && !(day.cardio||[]).length) html+='<div class="rt-empty">Este día no tiene ejercicios configurados.</div>';
+  }
+
+  html+='<div style="margin-top:18px"></div>';
+  html+='<button class="rt-big-btn" id="rt-peek-back">Volver al entreno de hoy'+
+    (hoyS&&!hoyS.libre?' · S'+(hoyS.weekIdx+1)+' D'+(hoyS.dayIdx+1):'')+'</button>';
+  if(!(f&&f.s.done)) html+='<button class="rt-big-btn outline" id="rt-peek-use" style="margin-top:0">Hacer este día hoy</button>';
+  if(f) html+='<div class="rt-dur-note">Para corregir estos datos, ve a ese día en Mi día y abre el entreno desde allí.</div>';
+  return html;
+}
+
+function rtBindPeek(body, rt, hoyS){
+  function ir(w,d){
+    if(w===hoyS.weekIdx && d===hoyS.dayIdx) RT_PEEK=null;
+    else RT_PEEK={rid:rt.id, w:w, d:d};
+    renderEntreno();
+    var vp=document.getElementById('viewport'); if(vp) vp.scrollTop=0;
+  }
+  var pw=body.querySelector('[data-sw-wprev]'), nw=body.querySelector('[data-sw-wnext]');
+  if(pw) pw.addEventListener('click',function(){ var w=RT_PEEK.w-1; if(w<0) return; ir(w, Math.min(RT_PEEK.d, rt.weeks[w].days.length-1)); });
+  if(nw) nw.addEventListener('click',function(){ var w=RT_PEEK.w+1; if(w>=rt.weeks.length) return; ir(w, Math.min(RT_PEEK.d, rt.weeks[w].days.length-1)); });
+  body.querySelectorAll('[data-sw-d]').forEach(function(b){
+    b.addEventListener('click',function(){ ir(RT_PEEK.w, +this.getAttribute('data-sw-d')); });
+  });
+  var back=document.getElementById('rt-peek-back');
+  if(back) back.addEventListener('click',function(){ RT_PEEK=null; renderEntreno(); });
+  var use=document.getElementById('rt-peek-use');
+  if(use) use.addEventListener('click',function(){
+    var w=RT_PEEK.w, d=RT_PEEK.d;
+    var cambiar=function(){
+      rtStash(hoyS);
+      var nueva=rtTakeDraft(rt.id+'.'+w+'.'+d) || rtBuildSess(rt,w,d);
+      rtSaveSess(CURRENT,nueva); RT_PEEK=null; renderEntreno();
+    };
+    if(rtSessTieneDatos(hoyS)) confirmSheet('Cambiar el entreno de hoy','Lo que llevas apuntado hoy se guarda aparte y no se pierde.','Cambiar',cambiar);
+    else cambiar();
+  });
+}
+
 function renderEntreno(){
   var s=rtSess(CURRENT);
   var body=document.getElementById('rt-ent-body');
@@ -9619,6 +9904,14 @@ function renderEntreno(){
   var day = (rt && rt.weeks[s.weekIdx] && rt.weeks[s.weekIdx].days[s.dayIdx]) ? rt.weeks[s.weekIdx].days[s.dayIdx] : null;
   var label=s.libre?'Entreno libre':rtDayLabel(day||s);
   if(s.recap){ renderEntrenoRecap(s, body); return; }
+
+  if(RT_PEEK && rt && RT_PEEK.rid===rt.id && rt.weeks[RT_PEEK.w] && rt.weeks[RT_PEEK.w].days[RT_PEEK.d] &&
+     !(RT_PEEK.w===s.weekIdx && RT_PEEK.d===s.dayIdx)){
+    body.innerHTML=rtPeekHTML(rt, RT_PEEK.w, RT_PEEK.d, s);
+    rtBindPeek(body, rt, s);
+    return;
+  }
+  RT_PEEK=null;
 
   var html='';
   if(rt){
@@ -10014,9 +10307,9 @@ function rtBindEntreno(s){
     var rt2=rtById(s.routineId); if(!rt2) return;
     var newW=Math.max(0,Math.min(rt2.weeks.length-1, s.weekIdx+delta));
     if(newW===s.weekIdx) return;
-    rtStash(s);
-    var nueva=rtTakeDraft(rt2.id+'.'+newW+'.'+s.dayIdx) || rtBuildSess(rt2,newW,Math.min(s.dayIdx,rt2.weeks[newW].days.length-1));
-    rtSaveSess(CURRENT,nueva); renderEntreno();
+    var nd=Math.min(s.dayIdx, (rt2.weeks[newW].days.length||1)-1);
+    RT_PEEK={rid:rt2.id, w:newW, d:Math.max(0,nd)};
+    renderEntreno();
   }
   if(sprev) sprev.addEventListener('click',function(){ cambiarSemana(-1); });
   if(snext) snext.addEventListener('click',function(){ cambiarSemana(1); });
@@ -10048,9 +10341,12 @@ function rtBindEntreno(s){
     if(w>=rt2.weeks.length) w=0;
     if(d>=rt2.weeks[w].days.length) d=0;
     if(w===s.weekIdx && d===s.dayIdx) return;
-    rtStash(s);                                            // aparca lo de este día, si hay algo
-    var nueva=rtTakeDraft(rt2.id+'.'+w+'.'+d) || rtBuildSess(rt2,w,d);
-    rtSaveSess(CURRENT,nueva);
+    // si hoy aún no has metido nada, tocar otro día de la misma semana lo elige para hoy (como antes)
+    if(!rtSessTieneDatos(s) && !rtDayDone(rt2.id,w,d) && w===s.weekIdx){
+      var nueva=rtTakeDraft(rt2.id+'.'+w+'.'+d) || rtBuildSess(rt2,w,d);
+      rtSaveSess(CURRENT,nueva); renderEntreno(); return;
+    }
+    RT_PEEK={rid:rt2.id, w:w, d:d};                      // si no, solo se consulta: el entreno de hoy no se toca
     renderEntreno();
   }
   body.querySelectorAll('[data-sw-w]').forEach(function(b){
@@ -13826,6 +14122,8 @@ safe('migrar-rutinas', function(){
 (function(){
   var srb=document.getElementById('sem-report-btn');
   if(srb) srb.addEventListener('click', function(){ safe('reporte', generateWeekReport); });
+  var stb=document.getElementById('sem-train-btn');
+  if(stb) stb.addEventListener('click', function(){ safe('reporte-entrenos', generateTrainingReport); });
 })();
 
 /* Todas las funciones que pintan pantallas pasan por la red de seguridad:
