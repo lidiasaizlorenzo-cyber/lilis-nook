@@ -1657,6 +1657,8 @@ button{cursor:pointer}
 .gc-ring{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--linea-s);display:flex;align-items:center;justify-content:center;background:#fff;transition:all .2s}
 .gc-ring svg{width:12px;height:12px;stroke:var(--tinta-3);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
 .gym-check.done{background:var(--verde);border-color:var(--verde)}
+#gym-rest.done{background:var(--tierra);border-color:var(--tierra)}
+#gym-rest.done .gc-ring-big{background:var(--tierra);border-color:var(--tierra)}
 .gc-ring-big{width:22px;height:22px;border-radius:50%;border:2px solid var(--linea-s);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .gc-ring-big svg{width:18px;height:18px;fill:none;stroke:var(--linea-s);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
 .gym-check.done .gc-ring-big{background:var(--verde);border-color:var(--verde)}
@@ -2364,10 +2366,16 @@ button{cursor:pointer}
               Gym
             </div>
           </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
           <button class="gym-check" id="gym-check" aria-label="Marcar gym hecho">
             <span class="gc-ring-big"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
             <span class="gc-l" id="gym-check-l">Marcar hecho</span>
           </button>
+          <button class="gym-check" id="gym-rest" aria-label="Marcar descanso">
+            <span class="gc-ring-big"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
+            <span class="gc-l" id="gym-rest-l">Descanso</span>
+          </button>
+          </div>
         </div>
 
         <div id="gym-body" class="gym-body" style="display:none">
@@ -4292,7 +4300,7 @@ function blankDay(){
     mealJudge:null,
     glovo:{ type:null, cost:'' },
     macros:{ kcal:'', prot:'', carb:'', fat:'' },
-    gym:{ done:false, type:null, fgroup:null, otro:'', cyc:null },
+    gym:{ done:false, rest:false, type:null, fgroup:null, otro:'', cyc:null },
     skin:{ am:false, pm:false, exfo:false, masc:false, tratFlag:false },
     pelo:{ masaje:false, mascarilla:false },
     steps:'', poop:null, frapo:{am:false,pm:false}, supp:{am:false,pm:false}, weight:'', bodyfat:'',
@@ -4428,6 +4436,10 @@ function renderMacros(){
 }
 function renderGymBottomLink(){
   var el=document.getElementById('gym-bottom-link'); if(!el) return;
+  if(DAY.gym && DAY.gym.rest){
+    el.innerHTML='<div class="gym-done-note"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>Día de descanso</div>';
+    return;
+  }
   // Si gym ya está hecho hoy → mostrar lo que se hizo
   if(DAY.gym && DAY.gym.done){
     var sess=rtRepSess?rtRepSess():null;
@@ -4968,6 +4980,8 @@ function renderDia(){
   gc.classList.toggle('done',DAY.gym.done);
 
   var _gcl=document.getElementById('gym-check-l'); if(_gcl) _gcl.textContent=DAY.gym.done?'Hecho':'Marcar hecho';
+  var _gr=document.getElementById('gym-rest'); if(_gr) _gr.classList.toggle('done',!!DAY.gym.rest);
+  var _grl=document.getElementById('gym-rest-l'); if(_grl) _grl.textContent=DAY.gym.rest?'Descansé':'Descanso';
   document.getElementById('gym-body').style.display = DAY.gym.done?'block':'none';
   if(DAY.gym.type==='hibrido' || DAY.gym.type==='barre'){
     if(!DAY.gym.otro) DAY.gym.otro = DAY.gym.type==='barre' ? 'Barre' : 'Híbrido';
@@ -5057,7 +5071,14 @@ function bindDia(){
   });
 
   document.getElementById('gym-check').addEventListener('click',function(){
-    DAY.gym.done=!DAY.gym.done; saveDay(); renderDia();
+    DAY.gym.done=!DAY.gym.done;
+    if(DAY.gym.done) DAY.gym.rest=false; // hecho y descanso se excluyen
+    saveDay(); renderDia();
+  });
+  document.getElementById('gym-rest').addEventListener('click',function(){
+    DAY.gym.rest=!DAY.gym.rest;
+    if(DAY.gym.rest) DAY.gym.done=false;
+    saveDay(); renderDia();
   });
   document.getElementById('gym-type').addEventListener('click',function(e){
     var b=e.target.closest('[data-gtype]'); if(!b) return;
@@ -9685,19 +9706,33 @@ function rtWeekAskHTML(){
 }
 
 function rtHoyCardHTML(){
+  // Si hoy has marcado Descanso en Mi día, manda sobre el plan
+  var _hoyDia=store.get('day',TODAY,null);
+  if(_hoyDia && _hoyDia.gym && _hoyDia.gym.rest){
+    return '<div class="rt-hoy hecho" style="cursor:default">'+
+      '<span class="rt-hoy-k"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg> Descanso</span>'+
+      '<span class="rt-hoy-t">Hoy descansas</span>'+
+      '<span class="rt-hoy-s"><span>lo has marcado en Mi día</span></span>'+
+      '</div>';
+  }
   var s=rtRepSess();
   var nx=null, rt=null, w=0, d=0, day=null;
   if(s && !s.libre && s.routineId){
     rt=rtById(s.routineId); w=s.weekIdx; d=s.dayIdx;
     if(rt && rt.weeks[w] && rt.weeks[w].days[d]) day=rt.weeks[w].days[d];
   } else if(!s){
-    // Comprobar si hoy es día de descanso según el plan de la semana
+    // Lo que dice el plan de la semana para hoy
     var _dow=(new Date()).getDay(); _dow=_dow===0?6:_dow-1;
     var _savedOff=WK_OFFSET; WK_OFFSET=0;
     var _plan=getWkPlan(); WK_OFFSET=_savedOff;
-    var _planArr=_plan&&_plan.gymByDay?wkDayArr(_plan.gymByDay[_dow]):null;
-    var _esDescanso=_plan&&_plan.gymByDay&&_planArr!==null&&_planArr.length===0;
-    if(!_esDescanso){
+    var _hayPlan=!!(_plan&&_plan.gymByDay);
+    var _planArr=_hayPlan?wkDayArr(_plan.gymByDay[_dow]):[];
+    var _esDescanso=_hayPlan&&_planArr.length===0;
+    var _FUERZA=['fuerza-sup','fuerza-inf','full'];
+    var _planFuerza=_planArr.filter(function(k){return _FUERZA.indexOf(k)>=0;});
+    var _planOtros=_planArr.filter(function(k){return _FUERZA.indexOf(k)<0;});
+    // Solo propone la rutina si no hay plan o si el plan de hoy incluye fuerza
+    if(!_esDescanso && (!_hayPlan || _planFuerza.length)){
       nx=rtNext();
       if(nx){ rt=nx.rt; w=nx.w; d=nx.d; day=rt.weeks[w].days[d]; }
     }
@@ -9711,7 +9746,15 @@ function rtHoyCardHTML(){
   } else if(rt && day){
     titulo = rtDayLabel(day);
     sub = rt.name+' · S'+(w+1)+' · D'+(d+1);
+    if(!s && _planOtros && _planOtros.length) sub += ' · también '+_planOtros.map(planKeyLabel).join(', ');
     cta = hecho? 'Ver' : (s? 'Continuar' : 'Empezar');
+  } else if(_planArr && _planArr.length){
+    // El plan de hoy no es de rutina (cycling, cardio, otro…): solo informa
+    return '<div class="rt-hoy" style="cursor:default">'+
+      '<span class="rt-hoy-k"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg> Entreno de hoy</span>'+
+      '<span class="rt-hoy-t">'+escapeHtml(_planArr.map(planKeyLabel).join(' + '))+'</span>'+
+      '<span class="rt-hoy-s"><span>según tu plan de la semana</span></span>'+
+      '</div>';
   } else if(_esDescanso){
     return '<div class="rt-hoy hecho" style="cursor:default">'+
       '<span class="rt-hoy-k"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg> Descanso</span>'+
@@ -10456,7 +10499,7 @@ function rtSyncDayGym(s){
   if(!s.done){
     if(DAY.gym.fromRt){ DAY.gym.done=false; DAY.gym.fromRt=false; }
   } else {
-    DAY.gym.done=true; DAY.gym.fromRt=true;
+    DAY.gym.done=true; DAY.gym.fromRt=true; DAY.gym.rest=false;
     if(s.type==='clase'){
       DAY.gym.type = (s.clase==='cycling') ? 'cycling' : 'otro';
       if(DAY.gym.type==='otro') DAY.gym.otro = s.dayName || s.claseName || (s.clase==='barre' ? 'Barre' : 'Clase');
