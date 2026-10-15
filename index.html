@@ -921,6 +921,18 @@ button{cursor:pointer}
 .hist-q.open .hist-q-body{display:block}
 
 /* Bloque alimentación semana */
+.wk-gym-day{background:var(--crema-2);border:1px solid var(--linea);border-radius:var(--r-s);padding:10px 12px;margin-bottom:8px}
+.wk-gym-day:last-child{margin-bottom:0}
+.wk-gym-day-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.wk-gym-day-d{font-size:11px;font-weight:800;color:var(--verde-d);text-transform:uppercase;letter-spacing:.05em}
+.wk-gym-type{font-size:10.5px;font-weight:700;color:var(--tinta-3);background:var(--crema-3,#ece8df);padding:2px 7px;border-radius:99px;border:1px solid var(--linea)}
+.wk-gym-ex{font-size:12.5px;color:var(--tinta-2);line-height:1.6;padding-top:2px}
+.wk-gym-ex-row{display:flex;align-items:baseline;gap:6px;padding:2px 0;border-top:1px solid var(--linea)}
+.wk-gym-ex-row:first-of-type{border-top:none;padding-top:0}
+.wk-gym-ex-name{flex:1;font-size:12.5px;color:var(--tinta)}
+.wk-gym-ex-sets{font-size:11px;color:var(--tinta-3);white-space:nowrap}
+.wk-gym-cardio{font-size:12.5px;color:var(--tinta-2);line-height:1.5}
+.wk-gym-empty{font-size:12px;color:var(--tinta-3);font-style:italic;text-align:center;padding:10px 0}
 .wk-food-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .wk-food-cell{background:var(--crema-2);border:1px solid var(--linea);border-radius:var(--r-s);padding:11px 12px;text-align:left}
 .wk-food-v{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--verde-dd);line-height:1;font-variant-numeric:tabular-nums}
@@ -1519,6 +1531,14 @@ button{cursor:pointer}
 .pr-group-title{font-size:12px;font-weight:700;color:var(--tinta-2);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 9px;display:flex;align-items:center;gap:8px}
 .pr-group-title:first-child{margin-top:0}
 .pr-group-title span{font-size:11px;color:var(--tinta-3);background:var(--crema-2);border:1px solid var(--linea);border-radius:10px;padding:1px 8px;font-weight:600}
+.merge-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--linea);border-radius:var(--r-s);margin-bottom:8px;cursor:pointer;transition:all .12s;background:var(--blanco)}
+.merge-row:active{background:var(--crema)}
+.merge-row.merge-sel{border-color:var(--verde);background:var(--verde-ll)}
+.merge-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--linea);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.merge-check svg{width:12px;height:12px;stroke:var(--blanco);stroke-width:2.5;fill:none;opacity:0}
+.merge-sel .merge-check{background:var(--verde);border-color:var(--verde)}
+.merge-sel .merge-check svg{opacity:1}
+.merge-name{font-size:14px;font-weight:600;color:var(--tinta)}
 .ex-newrec{display:flex;gap:8px}
 .ex-newrec .ex-f{flex:1;min-width:0}
 .ex-newrec .ex-f label{display:block;font-size:10px;color:var(--tinta-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;text-align:center;white-space:nowrap}
@@ -2431,11 +2451,15 @@ button{cursor:pointer}
             <button class="tmini" data-supp="pm">PM</button>
           </div>
         </div>
-        <div class="row">
+        <div class="row" data-dia-sec="dia-sec-peso">
           <span class="row-l">Peso <span class="row-sub" style="display:inline">opcional</span></span>
           <div class="inline-input"><input type="text" inputmode="decimal" id="in-weight" placeholder="—"><span>kg</span></div>
         </div>
-        
+        <div class="row">
+          <span class="row-l">Calorías quemadas <span class="row-sub" style="display:inline">opcional</span></span>
+          <div class="inline-input"><input type="text" inputmode="decimal" id="in-burn" placeholder="—"><span>kcal</span></div>
+        </div>
+
       </div>
 
       <!-- MI MENTE -->
@@ -2462,7 +2486,7 @@ button{cursor:pointer}
       </div>
 
       <!-- DIARIO con pregunta del día -->
-      <div class="panel" id="diary-panel">
+      <div class="panel" id="diary-panel" data-dia-sec="dia-sec-diario">
         <div class="section-label">
           <svg viewBox="0 0 24 24"><path d="M4 4h13a3 3 0 0 1 3 3v14H7a3 3 0 0 1-3-3z"/><path d="M9 8h7M9 12h7M9 16h4"/></svg>
           Diario
@@ -2633,7 +2657,7 @@ button{cursor:pointer}
 
       <!-- MODO MANUAL -->
       <div id="exp-mode-manual" style="display:none">
-        <div class="panel" data-dia-sec="dia-sec-medidas">
+        <div class="panel">
           <div class="exp-q">¿A qué hora empiezas?</div>
           <div class="exp-start-row">
             <input type="time" id="exp-start-time" class="exp-time-input" value="">
@@ -2641,7 +2665,7 @@ button{cursor:pointer}
           </div>
         </div>
 
-        <div class="panel" data-dia-sec="dia-sec-peso">
+        <div class="panel">
           <div class="exp-q">Tus zonas en orden</div>
           <div id="exp-manual-list"></div>
           <button class="add-line" id="exp-manual-add" style="margin-top:8px">
@@ -2865,6 +2889,25 @@ button{cursor:pointer}
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         Añadir ejercicio
       </button>
+      <button class="add-line" id="pr-merge-btn" style="margin-top:8px;color:var(--tinta-2)">
+        <svg viewBox="0 0 24 24"><path d="M8 18V6m0 0l-3 3m3-3 3 3M16 6v12m0 0l-3-3m3 3 3-3"/></svg>
+        Fusionar duplicados
+      </button>
+    </div>
+    <!-- Sub: fusionar ejercicios -->
+    <div class="screen" id="sc-fuerza-merge">
+      <button class="subback" id="merge-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Fuerza y PRs</button>
+      <h1 class="bigtitle" style="margin-top:6px">Fusionar duplicados</h1>
+      <p style="font-size:13px;color:var(--tinta-2);margin:0 0 16px">Selecciona los ejercicios que quieres unir.</p>
+      <div id="merge-list"></div>
+      <div id="merge-actions" style="display:none">
+        <div style="font-size:12px;color:var(--tinta-3);margin-bottom:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase">¿Con qué nombre los guardamos?</div>
+        <div id="merge-name-opts"></div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn" id="merge-clear" style="flex:1">Limpiar</button>
+          <button class="btn btn-primary" id="merge-confirm" style="flex:2">Fusionar</button>
+        </div>
+      </div>
     </div>
 
     <!-- Sub: detalle de ejercicio -->
@@ -2887,799 +2930,6 @@ button{cursor:pointer}
       </div>
       <div class="day-actions">
         <button class="clear-day" id="ex-cat-change" style="color:var(--verde-d);margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg>Cambiar categoría</button>
-        <button class="clear-day" id="ex-delete"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>Eliminar este ejercicio</button>
-      </div>
-    </div>
-
-    <!-- REPO: LECTURA -->
-    <div class="screen" id="sc-repo-lectura">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Lectura</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>Este año
-          <button class="opt-edit" id="books-goal-edit">objetivo: <b id="books-goal">12</b> ›</button>
-        </div>
-        <div class="books-ring-wrap">
-          <div class="ring" style="width:96px;height:96px">
-            <svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="38" fill="none" stroke="var(--verde-l)" stroke-width="8"/><circle id="books-arc" cx="48" cy="48" r="38" fill="none" stroke="var(--tierra)" stroke-width="8" stroke-linecap="round" stroke-dasharray="238.7" stroke-dashoffset="238.7" transform="rotate(-90 48 48)"/></svg>
-            <div class="lab"><b id="books-count">0</b><s id="books-of">de 12</s></div>
-          </div>
-          <div class="books-side">
-            <button class="books-btn" id="books-minus">−</button>
-            <span class="books-lbl">libros leídos</span>
-            <button class="books-btn" id="books-plus">+</button>
-          </div>
-        </div>
-        <div class="proj-msg" id="books-proj"></div>
-      </div>
-    </div>
-
-    <!-- REPO: PATRONES -->
-    <div class="screen" id="sc-repo-patrones">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Patrones y datos</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Lo que tus datos dicen de ti, sin que tengas que rellenar nada.</p>
-      <div id="patrones-body"></div>
-    </div>
-
-    <!-- REPO: HISTORIAL -->
-    <div class="screen" id="sc-repo-historial">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Historial</h1>
-      <div class="hist-tabs">
-        <button class="hist-tab on" data-htab="analisis">Análisis</button>
-        <button class="hist-tab" data-htab="archivo">Archivo</button>
-        <button class="hist-tab" data-htab="refugio">Refugio</button>
-      </div>
-      <div id="hist-body"></div>
-    </div>
-
-    <!-- Sub: detalle/edición de un día del historial -->
-    <div class="screen" id="sc-hist-day">
-      <button class="subback" id="histday-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Historial</button>
-      <h1 class="bigtitle" id="histday-title" style="margin-top:6px;font-size:24px">Día</h1>
-      <div class="panel" style="margin-bottom:14px">
-        <p class="panel-intro" style="margin:0">Aquí ves y editas todo lo de ese día. Para editarlo a fondo, ábrelo en "Mi día".</p>
-        <button class="btn btn-primary" id="histday-open" style="margin-top:13px;width:100%">Abrir este día en Mi día</button>
-      </div>
-      <div id="histday-body"></div>
-    </div>
-
-    <!-- PLANTAS DE CASA -->
-    <div class="screen" id="sc-plantas">
-      <button class="subback" id="plantas-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Casa</button>
-      <h1 class="bigtitle" style="margin-top:6px">Plantas</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Cada planta o grupo con su ritmo de riego. Cuando toque, te lo recuerdo en Mi día.</p>
-      <div id="plantas-list"></div>
-      <button class="add-line" id="plantas-add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Añadir planta o grupo</button>
-
-      <div class="rt-lab">Finanzas</div>
-      <div class="panel">
-        <p class="panel-intro" style="margin:0 0 12px">Te aviso una vez por semana para revisarlas, y el último día del mes para preparar el siguiente.</p>
-        <div class="row"><span class="row-l">Día del repaso semanal</span></div>
-        <div class="rt-eqrow" id="fin-dow"></div>
-      </div>
-    </div>
-
-    <!-- REPO: MIS RUTINAS -->
-    <div class="screen" id="sc-repo-rutinas">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Mis rutinas</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Tus rutinas de gym. La activa es la que te propone el entreno de cada día.</p>
-      <div id="rt-list"></div>
-      <button class="add-line" id="rt-new" style="margin-top:4px">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Crear una rutina
-      </button>
-      <div id="rt-arch"></div>
-    </div>
-
-    <!-- EDITAR RUTINA -->
-    <div class="screen" id="sc-rutina-edit">
-      <button class="subback" id="rt-edit-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis rutinas</button>
-      <h1 class="bigtitle" style="margin-top:6px" id="rt-edit-title">Rutina</h1>
-      <div id="rt-edit-body"></div>
-    </div>
-
-    <!-- CONFIGURAR DÍA DE LA RUTINA -->
-    <div class="screen" id="sc-dia-config">
-      <button class="subback" id="rt-cfg-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Editar rutina</button>
-      <h1 class="bigtitle" style="margin-top:6px" id="rt-cfg-title">Día</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px" id="rt-cfg-sub">—</p>
-      <div id="rt-cfg-body"></div>
-    </div>
-
-    <!-- ENTRENO DEL DÍA -->
-    <div class="screen" id="sc-entreno">
-      <button class="subback" id="rt-ent-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> <span id="rt-ent-backtx">Hoy</span></button>
-      <div id="rt-ent-body"></div>
-    </div>
-
-    <!-- REPO: CHALLENGES (sub-app rosa-coral) -->
-    <div class="screen ch-app" id="sc-repo-challenges">
-      <button class="subback ch-subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle ch-title" style="margin-top:6px">Mis challenges</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Repositorio de retos. Cada uno con su duración, su ritmo y su sentido.</p>
-      <div id="ch-active-host"></div>
-
-      <!-- Mis challenges personalizados -->
-      <div class="ch-cat-section" id="ch-custom-section">
-        <div class="ch-catalog-t">Tuyos</div>
-        <div id="ch-custom-list"></div>
-        <button class="ch-custom-create" id="ch-custom-create">
-          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          Crear el tuyo
-        </button>
-      </div>
-
-      <div class="ch-catalog-t">Catálogo</div>
-      <div id="ch-catalog"></div>
-      <div class="ch-cat-section" id="ch-hist-section" style="display:none">
-        <div class="ch-catalog-t">Histórico</div>
-        <div id="ch-history"></div>
-      </div>
-    </div>
-
-    <!-- Pantalla challenge activo -->
-    <div class="screen ch-app" id="sc-ch-active">
-      <button class="subback ch-subback" id="ch-active-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis challenges</button>
-      <div id="ch-active-body"></div>
-    </div>
-
-    <!-- Pantalla detalle catálogo (antes de aceptar) -->
-    <div class="screen ch-app" id="sc-ch-detail">
-      <button class="subback ch-subback" id="ch-detail-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis challenges</button>
-      <div id="ch-detail-body"></div>
-    </div>
-
-    <!-- Editor de challenge custom -->
-    <div class="screen ch-app" id="sc-ch-edit">
-      <button class="subback ch-subback" id="ch-edit-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mis challenges</button>
-      <h1 class="bigtitle ch-title" style="margin-top:6px" id="ch-edit-title">Crear challenge</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Diséñalo a tu medida. Solo aparece en "Tuyos".</p>
-      <div id="ch-edit-body"></div>
-    </div>
-
-    <!-- Editor de apartado personalizado de Mi día -->
-    <div class="screen" id="sc-section-edit">
-      <button class="subback" id="section-edit-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi día</button>
-      <h1 class="bigtitle" style="margin-top:10px" id="section-edit-title">Nuevo apartado</h1>
-      <p class="panel-intro" style="margin:-4px 0 16px">Hazlo a tu medida. Aparecerá en Mi día.</p>
-      <div id="section-edit-body"></div>
-    </div>
-
-    <!-- SEMANA -->
-    <div class="screen"<div class="panel" data-dia-sec="dia-sec-diario"> <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px"><h1 class="bigtitle" style="margin-top:0">Mi día</h1><button class="rt-mini" onclick="openDiaSecEditor()">✎ Editar</button></div>
-
-      <!-- RECORDATORIOS -->
-      <div id="recordatorios"></div>
-
-      <!-- SUEÑO -->
-      <div class="panel" data-dia-sec="dia-sec-sueno">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-          Sueño
-          <span class="opt" id="sleep-avg">—</span>
-        </div>
-        <div class="sleep-step">
-          <button class="sl-btn" id="sleep-minus" aria-label="Menos"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
-          <div class="sl-mid">
-            <div class="sl-v" id="sleep-hours">—</div>
-            <div class="sl-k">horas dormidas</div>
-          </div>
-          <button class="sl-btn" id="sleep-plus" aria-label="Más"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-        </div>
-        <div class="sleep-total" id="sleep-total">Toca + para apuntar lo que has dormido</div>
-      </div>
-
-      <!-- CÓMO ME SIENTO -->
-      <div class="panel panel-tierra" id="mood-panel">
-        <div class="section-label" style="color:var(--tierra-d)">
-          <svg viewBox="0 0 24 24" style="stroke:var(--tierra-d)"><path d="M12 21C7 17 3 13 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5C21 13 17 17 12 21z"/></svg>
-          ¿Cómo me siento hoy?
-          <span class="opt" id="mood-streak" style="color:var(--tierra-d)"></span>
-        </div>
-        <div class="mood-grid" id="mood-grid">
-          <button class="mood" data-mood="enérgica">Enérgica</button>
-          <button class="mood" data-mood="bien">Bien</button>
-          <button class="mood" data-mood="normal">Normal</button>
-          <button class="mood" data-mood="sensible">Sensible</button>
-          <button class="mood" data-mood="cansada">Cansada</button>
-          <button class="mood" data-mood="irascible">Irascible</button>
-        </div>
-        <textarea class="mood-note" id="in-moodnote" placeholder="Algo que quieras dejar escrito de hoy…"></textarea>
-      </div>
-
-      <!-- COMIDA -->
-      <div class="panel" data-dia-sec="dia-sec-comida">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M4 11h16v1a8 8 0 0 1-16 0z"/><path d="M7 7c.5-1 .5-2 0-3M11 7c.5-1 .5-2 0-3M15 7c.5-1 .5-2 0-3"/><path d="M3 20h18"/></svg>
-          Comida
-        </div>
-        <div id="meals-wrap"></div>
-        <div class="day-q" style="margin-top:6px">
-          <span class="dq-label">¿Comí como quería hoy?</span>
-          <div class="chip-row" id="meal-judge">
-            <button class="chip" data-judge="si">Sí</button>
-            <button class="chip" data-judge="más o menos">Más o menos</button>
-            <button class="chip" data-judge="no">No</button>
-          </div>
-        </div>
-        <div id="glovo-block" class="glovo-block" style="display:none">
-          <div class="gb-q">¿Pediste comida a domicilio o comprada?</div>
-          <div class="chip-row chip-row-grow" id="glovo-type">
-            <button class="chip chip-sm" data-glovo="domicilio">A domicilio (Glovo)</button>
-            <button class="chip chip-sm" data-glovo="comprada">Comprada fuera</button>
-          </div>
-          <div class="gb-cost" id="gb-cost" style="display:none">
-            <span class="row-l">¿Cuánto te costó?</span>
-            <div class="inline-input"><input type="text" inputmode="decimal" id="in-glovo-cost" placeholder="0"><span>€</span></div>
-          </div>
-          <div class="gb-mirror" id="gb-mirror"></div>
-        </div>
-        <div id="macros-block" class="macros-block" style="display:none">
-          <div class="mb-label">Detalle nutricional</div>
-          <div class="macros-grid">
-            <div class="macro-f"><label>Kcal</label><input type="text" inputmode="numeric" id="mac-kcal" placeholder="—"></div>
-            <div class="macro-f"><label>Prot (g)</label><input type="text" inputmode="numeric" id="mac-prot" placeholder="—"></div>
-            <div class="macro-f"><label>Carbs (g)</label><input type="text" inputmode="numeric" id="mac-carb" placeholder="—"></div>
-            <div class="macro-f"><label>Grasa (g)</label><input type="text" inputmode="numeric" id="mac-fat" placeholder="—"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- GYM -->
-      <div class="panel gym-panel" data-dia-sec="dia-sec-gym">
-        <div class="gym-top">
-          <div class="gym-top-l">
-            <div class="section-label" style="margin-bottom:4px">
-              <svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg>
-              Gym
-            </div>
-          </div>
-          <button class="gym-check" id="gym-check" aria-label="Marcar gym hecho">
-            <span class="gc-ring-big"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>
-            <span class="gc-l" id="gym-check-l">Marcar hecho</span>
-          </button>
-        </div>
-
-        <div id="gym-body" class="gym-body" style="display:none">
-          <div class="gym-fieldlabel">Tipo</div>
-          <div class="chip-row chip-row-grow" id="gym-type" style="margin-bottom:10px">
-            <button class="chip type-chip" data-gtype="cycling">Cycling</button>
-            <button class="chip type-chip" data-gtype="fuerza">Fuerza</button>
-            <button class="chip type-chip" data-gtype="otro">Otro</button>
-          </div>
-          <div id="gym-fuerza" class="gym-sub" style="display:none">
-            <div class="gym-fieldlabel" style="margin-top:8px">Área</div>
-            <div class="chip-row chip-row-grow" id="gym-fgroup">
-              <button class="chip cat-chip" data-fgroup="upper">Upper</button>
-              <button class="chip cat-chip" data-fgroup="lower">Lower</button>
-              <button class="chip cat-chip" data-fgroup="full body">Full body</button>
-            </div>
-          </div>
-          <div id="gym-otro" class="gym-sub" style="display:none">
-            <input type="text" class="gym-otro-input" id="in-otro" placeholder="¿Qué hiciste? (ej. barre, yoga…)" style="width:100%">
-          </div>
-        </div>
-
-        <div id="gym-bottom-link"></div>
-      </div>
-
-      <!-- SKINCARE -->
-      <div class="panel" data-dia-sec="dia-sec-skincare">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 3c-1 4-5 6-5 11a5 5 0 0 0 10 0c0-5-4-7-5-11z"/></svg>
-          Skincare
-        </div>
-        <div class="toggle-row">
-          <button class="toggle" data-skin="am"><span class="tg-box"></span><span class="tg-l">Rutina mañana</span></button>
-          <button class="toggle" data-skin="pm"><span class="tg-box"></span><span class="tg-l">Rutina noche</span></button>
-        </div>
-        <div class="skin-recur" id="skin-recur"></div>
-      </div>
-
-      <!-- PELO -->
-      <div class="panel" data-dia-sec="dia-sec-pelo">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M3 8.5c0-1.6 3.8-3 9-3s9 1.4 9 3v2.5H3z"/><path d="M5 11v6M8 11v7M11 11v7M14 11v7M17 11v6"/></svg>
-          Pelo
-        </div>
-        <div class="toggle-row">
-          <button class="toggle" data-pelo="masaje"><span class="tg-box"></span><span class="tg-l">Masaje capilar</span></button>
-          <button class="toggle" data-pelo="mascarilla"><span class="tg-box"></span><span class="tg-l">Mascarilla</span></button>
-        </div>
-        <div class="pelo-week" id="pelo-week"></div>
-        <div class="pelo-recur" id="pelo-recur"></div>
-      </div>
-
-      <!-- MÁS DEL DÍA -->
-      <div class="panel" data-dia-sec="dia-sec-pasos">
-        <div class="section-label" style="margin-bottom:6px">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 10v3l2 2M9 3h6"/></svg>
-          Más del día
-        </div>
-        <div class="row">
-          <span class="row-l">Pasos</span>
-          <div class="inline-input"><input type="text" inputmode="numeric" id="in-steps" placeholder="0"><span>pasos</span></div>
-        </div>
-        <div class="row">
-          <span class="row-l">¿Fui al baño?</span>
-          <div class="toggle-mini">
-            <button class="tmini" data-poop="si">Sí</button>
-            <button class="tmini" data-poop="no">No</button>
-          </div>
-        </div>
-        <div class="row">
-          <span class="row-l">Paseo de Frapo</span>
-          <div class="toggle-mini">
-            <button class="tmini" data-frapo="am">AM</button>
-            <button class="tmini" data-frapo="pm">PM</button>
-          </div>
-        </div>
-        <div class="row">
-          <span class="row-l">Suplementos</span>
-          <div class="toggle-mini">
-            <button class="tmini" data-supp="am">AM</button>
-            <button class="tmini" data-supp="pm">PM</button>
-          </div>
-        </div>
-        <div class="row">
-          <span class="row-l">Peso <span class="row-sub" style="display:inline">opcional</span></span>
-          <div class="inline-input"><input type="text" inputmode="decimal" id="in-weight" placeholder="—"><span>kg</span></div>
-        </div>
-        
-      </div>
-
-      <!-- MI MENTE -->
-      <div class="panel" data-dia-sec="dia-sec-mente">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-3-2-5-5-5-1 0-2 0-3 1 0 3 2 5 5 5 1 0 2 0 3-1z"/><path d="M12 14c0-3 2-5 5-5 1 0 2 0 3 1 0 3-2 5-5 5-1 0-2 0-3-1z"/></svg>
-          Mi mente
-        </div>
-        <button class="toggle" data-read="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy leí</span></button>
-        <button class="toggle" data-studylang="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy estudié idioma</span></button>
-        <button class="toggle" data-studycourse="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy estudié curso</span></button>
-        <button class="toggle" data-crochet="1" style="width:100%;margin-bottom:9px"><span class="tg-box"></span><span class="tg-l">Hoy hice crochet</span></button>
-        <button class="toggle" data-enrich="1" style="width:100%"><span class="tg-box"></span><span class="tg-l">Hice algo que me enriquece</span></button>
-        <div class="enrich-note" id="enrich-note" style="display:none">
-          <input type="text" id="in-enrich" placeholder="¿qué fue? (opcional)">
-        </div>
-        <div class="rrss-block">
-          <div class="rrss-head">
-            <span class="row-l">Tiempo en redes hoy</span>
-            <div class="inline-input"><input type="text" inputmode="numeric" id="in-rrss" placeholder="0"><span>min</span></div>
-          </div>
-          <div class="rrss-mirror" id="rrss-mirror"></div>
-        </div>
-      </div>
-
-      <!-- DIARIO con pregunta del día -->
-      <div class="panel" id="diary-panel">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M4 4h13a3 3 0 0 1 3 3v14H7a3 3 0 0 1-3-3z"/><path d="M9 8h7M9 12h7M9 16h4"/></svg>
-          Diario
-        </div>
-        <div class="diary-q" id="diary-q">—</div>
-        <textarea class="diary-input" id="diary-input" placeholder="lo que quieras, sin filtro"></textarea>
-        <div class="diary-foot">
-          <button class="diary-shuffle" id="diary-shuffle">
-            <svg viewBox="0 0 24 24"><path d="M16 3l5 5-5 5M21 8H8M8 21l-5-5 5-5M3 16h13"/></svg>
-            otra pregunta
-          </button>
-          <span class="diary-note">puedes volver atrás y leerte</span>
-        </div>
-      </div>
-
-      <!-- Apartados personalizados (creados por el usuario) -->
-      <div id="custom-sections"></div>
-      <button class="add-section-btn" id="add-section-btn">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Añadir apartado
-      </button>
-
-      <button class="vault-link" id="dia-casa" style="background:#EEF3F2;border-color:#D8E2DF;margin-top:4px">
-        <span class="vl-l" style="color:#4F6A65">
-          <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h4v-6h6v6h4V10"/></svg>
-          <span>Casa · limpieza al día</span>
-        </span>
-        <span class="vl-r" style="color:#4F6A65">entrar</span>
-      </button>
-
-      <div class="day-actions">
-        <button class="clear-day" id="clear-day">
-          <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
-          Borrar los datos de este día
-        </button>
-      </div>
-
-      <div class="panel bare" style="text-align:center;padding:4px 0 6px">
-        <p style="font-size:12px;color:var(--tinta-3);font-style:italic;font-family:var(--serif)">se guarda solo, día a día</p>
-      </div>
-    </div>
-
-    <!-- CASA: home (plan + express) -->
-    <div class="screen" id="sc-casa">
-      <button class="subback" id="casa-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi día</button>
-      <h1 class="bigtitle" style="margin-top:6px">Casa</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Tu hogar al día sin agobios.</p>
-
-      <!-- QUÉ TOCA AHORA -->
-      <div class="panel">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
-          Hoy te toca
-          <span class="opt" id="casa-due-count"></span>
-        </div>
-        <div id="casa-due-list"></div>
-      </div>
-
-      <!-- ESTA SEMANA -->
-      <div class="panel">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M16 2v4M8 2v4"/></svg>
-          Esta semana
-        </div>
-        <div id="casa-week-body"></div>
-        <div class="casa-week-foot">Miércoles y viernes son tus días fuertes.</div>
-      </div>
-
-      <!-- ACCIONES PRINCIPALES -->
-      <div class="casa-actions">
-        <button class="casa-action" id="casa-go-express">
-          <div class="ca-ic"><svg viewBox="0 0 24 24"><path d="M12 2v6l3-3M12 8l-3-3M3 12h6l-3-3M3 12l3 3M21 12h-6l3-3M21 12l-3 3M12 22v-6l3 3M12 16l-3 3"/></svg></div>
-          <div class="ca-tx">
-            <div class="ca-t">Limpieza express</div>
-            <div class="ca-s">por tiempo, con cronómetro</div>
-          </div>
-          <svg class="ca-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-        <button class="casa-action" id="casa-go-plantas">
-          <div class="ca-ic"><svg viewBox="0 0 24 24"><path d="M12 22V11M12 11c0-3-2-5-5-5 0 3 2 5 5 5zM12 11c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6z"/></svg></div>
-          <div class="ca-tx">
-            <div class="ca-t">Plantas</div>
-            <div class="ca-s" id="casa-plantas-sub">cada cuánto riegas cada una</div>
-          </div>
-          <svg class="ca-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-        <button class="casa-action" id="casa-go-plan">
-          <div class="ca-ic"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16M8 15h2M14 15h2M8 18h2"/></svg></div>
-          <div class="ca-tx">
-            <div class="ca-t">Plan completo</div>
-            <div class="ca-s">semanal · mensual · trimestral · semestral · anual</div>
-          </div>
-          <svg class="ca-arr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-      </div>
-
-      <!-- RACHA -->
-      <div class="panel" id="casa-streak-panel">
-        <div class="casa-streak-row">
-          <div class="casa-streak-ic">
-            <svg viewBox="0 0 24 24"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-5 5-10z"/></svg>
-          </div>
-          <div class="casa-streak-tx">
-            <div class="casa-streak-big" id="casa-streak-big">0</div>
-            <div class="casa-streak-sub" id="casa-streak-sub">semanas seguidas con todo lo semanal</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CASA: plan completo -->
-    <div class="screen" id="sc-casa-plan">
-      <button class="subback" id="casa-plan-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Casa</button>
-      <h1 class="bigtitle" style="margin-top:6px">Plan completo</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Tickea cuando lo hagas. Se vuelve a marcar pendiente según su frecuencia.</p>
-      <div id="casa-plan-body"></div>
-      <button class="add-line" id="casa-plan-add" style="margin-top:12px">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Añadir tarea
-      </button>
-      <button class="pb-link" id="casa-plan-reset" style="margin-top:14px;width:100%;text-align:center;padding:10px;border:1px dashed var(--linea);background:none;border-radius:99px;color:var(--tinta-3);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">restaurar tareas predeterminadas</button>
-    </div>
-
-    <!-- CASA: express builder -->
-    <div class="screen" id="sc-casa-express">
-      <button class="subback" id="casa-exp-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Casa</button>
-      <h1 class="bigtitle" style="margin-top:6px">Limpieza express</h1>
-      <p class="panel-intro" style="margin:-6px 0 16px">Elige cómo quieres montar la sesión.</p>
-
-      <!-- Selector de modo -->
-      <div class="exp-mode-tabs">
-        <button class="exp-mode-tab on" data-mode="auto">Reparto automático</button>
-        <button class="exp-mode-tab" data-mode="manual">Yo lo monto</button>
-      </div>
-
-      <!-- MODO AUTO -->
-      <div id="exp-mode-auto">
-        <div class="panel">
-          <div class="exp-q">¿Cuánto tiempo tienes?</div>
-          <div class="exp-mins" id="exp-mins-row">
-            <button class="exp-chip" data-mins="20">20 min</button>
-            <button class="exp-chip on" data-mins="30">30 min</button>
-            <button class="exp-chip" data-mins="45">45 min</button>
-            <button class="exp-chip" data-mins="60">1 h</button>
-            <button class="exp-chip" data-mins="90">1 h 30</button>
-            <button class="exp-chip" data-mins="120">2 h</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="exp-q">¿Qué zonas?</div>
-          <div class="exp-zones" id="exp-zones-row"></div>
-          <button class="add-line" id="exp-zone-add" style="margin-top:8px">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            Añadir zona
-          </button>
-        </div>
-
-        <div class="panel" id="exp-preview" style="display:none">
-          <div class="exp-q">Tu sesión</div>
-          <div id="exp-preview-body"></div>
-          <button class="exp-start" id="exp-start">
-            <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg>
-            Empezar
-          </button>
-        </div>
-      </div>
-
-      <!-- MODO MANUAL -->
-      <div id="exp-mode-manual" style="display:none">
-        <div class="panel" data-dia-sec="dia-sec-medidas">
-          <div class="exp-q">¿A qué hora empiezas?</div>
-          <div class="exp-start-row">
-            <input type="time" id="exp-start-time" class="exp-time-input" value="">
-            <button class="exp-chip" id="exp-start-now">Ahora</button>
-          </div>
-        </div>
-
-        <div class="panel" data-dia-sec="dia-sec-peso">
-          <div class="exp-q">Tus zonas en orden</div>
-          <div id="exp-manual-list"></div>
-          <button class="add-line" id="exp-manual-add" style="margin-top:8px">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            Añadir zona
-          </button>
-        </div>
-
-        <div class="panel" id="exp-manual-preview" style="display:none">
-          <div class="exp-q">Tu sesión</div>
-          <div id="exp-manual-preview-body"></div>
-          <button class="exp-start" id="exp-manual-start">
-            <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></svg>
-            Empezar
-          </button>
-        </div>
-      </div>
-
-      <!-- últimas sesiones (compartido) -->
-      <div class="panel" id="exp-history-panel" style="display:none">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>
-          Sesiones anteriores
-        </div>
-        <div id="exp-history"></div>
-      </div>
-    </div>
-
-    <!-- CASA: cronómetro de sesión -->
-    <div class="screen" id="sc-casa-run">
-      <div class="run-wrap">
-        <div class="run-zone" id="run-zone">—</div>
-        <div class="run-time" id="run-time">00:00</div>
-        <div class="run-next" id="run-next"></div>
-        <div class="run-progress"><div class="run-progress-fill" id="run-progress-fill"></div></div>
-        <div class="run-controls">
-          <button class="run-skip" id="run-skip">Saltar zona</button>
-          <button class="run-pause" id="run-pause">Pausa</button>
-          <button class="run-stop" id="run-stop">Terminar</button>
-        </div>
-        <div class="run-list" id="run-list"></div>
-      </div>
-    </div>
-
-    <!-- PROGRESO (índice de repositorios) -->
-    <div class="screen" id="sc-prog">
-      <h1 class="bigtitle" style="margin-top:14px">Mi progreso</h1>
-
-      <!-- PESO: gráfica directa + ver más -->
-      <div class="prog-block" id="prog-peso-block">
-        <div class="prog-block-head">
-          <div class="prog-block-title">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M7 15l4-5 3 3 5-7"/></svg></div>
-            <div>
-              <div class="rcr-label">Peso</div>
-              <div class="prog-block-big" id="prog-peso-now">—</div>
-            </div>
-          </div>
-          <div class="prog-block-trend" id="prog-peso-trend"></div>
-        </div>
-        <div class="prog-range-tabs">
-          <button class="prt on" data-prange="W">Semana</button>
-          <button class="prt" data-prange="M">Mes</button>
-          <button class="prt" data-prange="Y">Año</button>
-          <button class="prt" data-prange="ALL">Todo</button>
-        </div>
-        <div class="prog-chart" id="prog-peso-chart"></div>
-        <div class="prog-baseline" id="prog-peso-baseline"></div>
-        <div class="prog-peso-msg" id="prog-peso-msg"></div>
-        <div class="prog-peso-safe" id="prog-peso-safe" style="display:none"></div>
-        <button class="prog-more" data-repo="sc-repo-peso">Historial completo <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-      </div>
-
-      <!-- MEDIDAS: última toma + ver más -->
-      <div class="prog-block" id="prog-medidas-block">
-        <div class="prog-block-head">
-          <div class="prog-block-title">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/></svg></div>
-            <div>
-              <div class="rcr-label">Medidas</div>
-              <div class="prog-block-sub" id="prog-medidas-when">sin tomas</div>
-            </div>
-          </div>
-        </div>
-        <div class="prog-md-grid" id="prog-medidas-grid"></div>
-        <div class="prog-baseline" id="prog-medidas-baseline"></div>
-        <button class="prog-more" data-repo="sc-repo-medidas">Historial completo <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-      </div>
-
-      <!-- Pareja: Fuerza + Lectura (lectura con barra) -->
-      <div class="repo-grid">
-        <button class="repo-card-rich" data-repo="sc-repo-fuerza">
-          <div class="rcr-head">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg></div>
-            <div class="rcr-label">Fuerza</div>
-          </div>
-          <div class="rcr-big" id="rcr-fuerza-big">—</div>
-          <div class="rcr-sub" id="rcr-fuerza-sub">sin PRs aún</div>
-        </button>
-
-        <button class="repo-card-rich" data-repo="sc-repo-lectura">
-          <div class="rcr-head">
-            <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></div>
-            <div class="rcr-label">Lectura</div>
-          </div>
-          <div class="rcr-big" id="rcr-lectura-big">—</div>
-          <div class="rcr-bar"><div class="rcr-bar-fill" id="rcr-lectura-fill" style="width:0%"></div></div>
-          <div class="rcr-sub" id="rcr-lectura-sub">año en curso</div>
-        </button>
-      </div>
-
-      <button class="repo-card-wide-rich" data-repo="sc-repo-patrones">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg></div>
-          <div>
-            <div class="rcr-label">Patrones y datos</div>
-            <div class="rcw-sub">cómo se relaciona todo lo tuyo</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-      <button class="repo-card-wide-rich" data-repo="sc-repo-historial">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M8 17V9M13 17V5M18 17v-6"/></svg></div>
-          <div>
-            <div class="rcr-label">Historial completo</div>
-            <div class="rcw-sub" id="repo-hist-s">todo lo que registres, navegable</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-
-      <button class="repo-card-wide-rich" data-repo="sc-repo-rutinas">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/></svg></div>
-          <div>
-            <div class="rcr-label">Mis rutinas</div>
-            <div class="rcw-sub" id="repo-rt-s">tus rutinas de gym</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-            <button class="repo-card-wide-rich rcw-ch" data-repo="sc-repo-challenges">
-        <div class="rcw-l">
-          <div class="rcr-ic"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 0 12 0V3H6zM12 15v6M8 21h8"/></svg></div>
-          <div>
-            <div class="rcr-label">Mis challenges</div>
-            <div class="rcw-sub" id="repo-ch-s">repositorio de retos</div>
-          </div>
-        </div>
-        <svg class="rcw-arrow" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-      </button>
-
-      <!-- TU JARDÍN -->
-      <div class="panel" style="margin-top:6px">
-        <div class="section-label">
-          <svg viewBox="0 0 24 24"><path d="M12 22V8M12 8c0-3-2-5-5-5 0 3 2 5 5 5zM12 8c0-3 2-5 5-5 0 3-2 5-5 5z"/></svg>
-          Tu jardín
-        </div>
-        <p class="panel-intro" id="garden-intro" style="margin-bottom:14px">—</p>
-        <div class="garden-grid" id="garden-grid"></div>
-        <div class="garden-progress" id="garden-progress" style="display:none">
-          <div class="gp-bar"><div class="gp-fill" id="gp-fill"></div></div>
-          <div class="gp-tx" id="gp-tx">—</div>
-        </div>
-      </div>
-
-      <div class="panel bare" style="text-align:center;padding:4px 0 8px">
-        <p style="font-size:12px;color:var(--tinta-3);font-style:italic;font-family:var(--serif)">tu yo es tu mayor proyecto</p>
-      </div>
-    </div>
-
-    <!-- REPO: PESO -->
-    <div class="screen" id="sc-repo-peso">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Historial de peso</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Todos tus registros</div>
-        <p class="panel-intro" style="margin-bottom:14px">Para añadir un peso nuevo, anótalo en <b>Mi día</b>. Aquí ves toda tu historia.</p>
-        <div id="pz-history"></div>
-      </div>
-    </div>
-
-    <!-- REPO: MEDIDAS -->
-    <div class="screen" id="sc-repo-medidas">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Medidas</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Tomar medidas de hoy
-          <span class="opt" id="md-lastdate"></span>
-        </div>
-        <div class="md-form" id="md-form"></div>
-        <button class="btn btn-primary" id="md-save" style="margin-top:12px">Guardar medidas de hoy</button>
-      </div>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Evolución</div>
-        <p class="md-hint" id="md-hint" style="display:none">Desliza la tabla para ver más fechas</p>
-        <div class="md-evo-wrap"><div id="md-evo"></div></div>
-        <p class="md-note">La flecha compara con la toma anterior · el valor de antes va en cursiva</p>
-      </div>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Tomas registradas</div>
-        <p class="panel-intro" style="margin-bottom:14px">Toca una toma para marcarla como punto de partida.</p>
-        <div id="md-takes-list"></div>
-      </div>
-    </div>
-
-    <!-- REPO: FUERZA -->
-    <div class="screen" id="sc-repo-fuerza">
-      <button class="subback" data-rback><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Mi progreso</button>
-      <h1 class="bigtitle" style="margin-top:6px">Fuerza y PRs</h1>
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-        <input type="text" id="pr-search" placeholder="Buscar ejercicio…">
-      </div>
-      <div id="pr-library"></div>
-      <button class="add-line" id="pr-add" style="margin-top:4px">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Añadir ejercicio
-      </button>
-    </div>
-
-    <!-- Sub: detalle de ejercicio -->
-    <div class="screen" id="sc-exdetail">
-      <button class="subback" id="exdetail-back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg> Fuerza y PRs</button>
-      <h1 class="bigtitle" id="exdetail-title" style="margin-top:6px">Ejercicio</h1>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Tu progreso</div>
-        <div class="evo-chart-card"><div id="ex-chart"></div></div>
-        <div id="ex-records"></div>
-      </div>
-      <div class="panel">
-        <div class="section-label"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Registrar marca de hoy</div>
-        <div class="ex-newrec">
-          <div class="ex-f"><label>Reps</label><input type="text" inputmode="numeric" id="nr-reps" placeholder="10"></div>
-          <div class="ex-f"><label>Kg</label><input type="text" inputmode="decimal" id="nr-kg" placeholder="25"></div>
-          <div class="ex-f"><label>Seg</label><input type="text" inputmode="numeric" id="nr-sec" placeholder="–"></div>
-        </div>
-        <button class="btn btn-primary" id="nr-save" style="margin-top:12px">Guardar marca</button>
-      </div>
-      <div class="day-actions">
-        <button class="clear-day" id="ex-cat-change" style="color:var(--verde-d)"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg>Cambiar categoría</button>
         <button class="clear-day" id="ex-delete"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>Eliminar este ejercicio</button>
       </div>
     </div>
@@ -3935,7 +3185,8 @@ button{cursor:pointer}
       <div class="panel bare" style="text-align:center;padding:4px 0 8px">
         <p style="font-size:12px;color:var(--tinta-3);font-style:italic;font-family:var(--serif)">una semana cada vez</p>
       </div>
-      <button class="add-line" id="sem-report-btn" style="margin:0 0 20px"><svg viewBox="0 0 24 24"><path d="M12 15V3M9 12l3 3 3-3M5 20h14"/></svg>Descargar resumen de la semana</button>
+      <button class="add-line" id="sem-report-btn" style="margin:0 0 8px"><svg viewBox="0 0 24 24"><path d="M12 15V3M9 12l3 3 3-3M5 20h14"/></svg>Descargar resumen de la semana</button>
+      <button class="add-line" id="gym-report-btn" style="margin:0 0 20px"><svg viewBox="0 0 24 24"><path d="M12 15V3M9 12l3 3 3-3M5 20h14"/></svg>Descargar resumen de entrenos</button>
     </div>
 
     <!-- REFUGIO -->
@@ -4061,6 +3312,15 @@ button{cursor:pointer}
         </div>
       </div>
 
+      <div class="set-group">
+        <div class="set-grouplabel">Diagnóstico</div>
+        <div class="set-item">
+          <div><div class="si-l">Errores de la app</div><div class="si-s">para reportar bugs</div></div>
+          <button id="btn-show-bugs">Ver errores</button>
+        </div>
+        <div id="bug-panel" style="display:none;margin-top:10px;background:var(--crema-2);border:1px solid var(--linea);border-radius:10px;padding:12px;max-height:200px;overflow-y:auto;font-size:11px;font-family:monospace;color:var(--tinta-2);word-break:break-all;white-space:pre-wrap"></div>
+      </div>
+
       <div class="cal-foot"><button class="btn btn-ghost" id="set-close" style="flex:1">Cerrar</button></div>
     </div>
   </div>
@@ -4171,6 +3431,20 @@ button{cursor:pointer}
         <button class="btn btn-ghost" id="qpr-cancel">Cancelar</button>
         <button class="btn btn-primary" id="qpr-save">Guardar marca</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Hoja selector de quests (crear challenge) -->
+  <div class="sheet-mask" id="qpick-mask">
+    <div class="sheet">
+      <div class="sheet-grip"></div>
+      <div class="sheet-head"><div class="sheet-title">Añadir quest</div></div>
+      <div class="qpick-tabs">
+        <button class="qpick-tab on" data-qptab="repo">Elegir de la lista</button>
+        <button class="qpick-tab" data-qptab="new">Crear nueva</button>
+      </div>
+      <div id="qpick-body"></div>
+      <div class="cal-foot"><button class="btn btn-ghost" id="qpick-cancel" style="flex:1">Cancelar</button></div>
     </div>
   </div>
 
@@ -4416,7 +3690,7 @@ function computeInsights(){
   // ---- INSIGHT 10: Patrón positivo — días con gym y mejor ánimo
   // (solo lo digo de vez en cuando — si hay al menos 5 días de gym en últimos 30)
   var gymDays=0, gymGoodMood=0, nonGymDays=0, nonGymGoodMood=0;
-  var goodMoods=['fuerte','tranquila','feliz','ligera'];
+  var goodMoods=['enérgica','bien'];
   for(var i=1; i<31; i++){
     var dd=new Date(today); dd.setDate(today.getDate()-i);
     var d=store.get('day',dateKey(dd),null);
@@ -4511,7 +3785,9 @@ function renderHoy(){
   if(typeof renderInsights==='function') renderInsights();
   if(typeof renderHoyEntreno==='function') renderHoyEntreno();
   var _srb=document.getElementById('sem-report-btn');
-  if(_srb) _srb.addEventListener('click', generateWeekReport);
+  if(_srb) _srb.onclick = generateWeekReport;
+  var _grb=document.getElementById('gym-report-btn');
+  if(_grb) _grb.onclick = generateGymReport;
 
   // saludo
   var s = h<6?'Buenas noches':h<13?'Buenos días':h<20?'Buenas tardes':'Buenas noches';
@@ -4798,6 +4074,27 @@ document.getElementById('open-settings').addEventListener('click',function(){ op
 document.getElementById('set-close').addEventListener('click',function(){ closeSheet('set-mask'); });
 document.getElementById('set-mask').addEventListener('click',function(e){ if(e.target===this) closeSheet('set-mask'); });
 
+/* bug panel */
+(function(){
+  var _errs=[];
+  var _origErr=window.onerror;
+  window.onerror=function(msg,src,line,col,err){
+    _errs.push('[ERROR] '+msg+' ('+src+':'+line+')');
+    if(_errs.length>50) _errs=_errs.slice(-50);
+    if(_origErr) return _origErr.apply(this,arguments);
+  };
+  var _origWarn=console.warn, _origConsoleErr=console.error;
+  console.error=function(){ _errs.push('[console.error] '+Array.prototype.slice.call(arguments).join(' ')); if(_errs.length>50) _errs=_errs.slice(-50); _origConsoleErr.apply(console,arguments); };
+  document.getElementById('btn-show-bugs').addEventListener('click',function(){
+    var panel=document.getElementById('bug-panel');
+    if(panel.style.display==='none'){
+      panel.style.display='block';
+      panel.textContent=_errs.length?_errs.join('\n'):'Sin errores registrados ✓';
+      this.textContent='Ocultar';
+    } else { panel.style.display='none'; this.textContent='Ver errores'; }
+  });
+})();
+
 /* export / import / wipe */
 function toast(msg){
   var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on');
@@ -4857,7 +4154,7 @@ function showScreen(id, isRefuge){
     if(isTab) prevTab=id;
     var tabs=document.querySelectorAll('.tab');
     // las subpantallas (ej. detalle de ejercicio) mantienen marcada su pestaña madre
-    var marcar = (id.indexOf('sc-repo-')===0 || id==='sc-exdetail' || id==='sc-hist-day' || id==='sc-rutina-edit' || id==='sc-dia-config' || id==='sc-plantas' || id==='sc-repo-challenges' || id==='sc-ch-active' || id==='sc-ch-detail' || id==='sc-ch-edit') ? 'sc-prog' : id;
+    var marcar = (id.indexOf('sc-repo-')===0 || id==='sc-exdetail' || id==='sc-hist-day' || id==='sc-rutina-edit' || id==='sc-dia-config' || id==='sc-plantas' || id==='sc-repo-challenges' || id==='sc-ch-active' || id==='sc-ch-detail' || id==='sc-ch-edit' || id==='sc-fuerza-merge') ? 'sc-prog' : id;
     for(var t=0;t<tabs.length;t++) tabs[t].classList.toggle('on', tabs[t].getAttribute('data-go')===marcar);
   }
   if(id==='sc-entreno'){ var tb=document.querySelectorAll('.tab'); for(var q=0;q<tb.length;q++) tb[q].classList.toggle('on', tb[q].getAttribute('data-go')===prevTab); }
@@ -4865,7 +4162,7 @@ function showScreen(id, isRefuge){
   if(id==='sc-sem' && typeof renderSemana==='function') renderSemana();
   if(id==='sc-ref' && typeof renderRefugio==='function') renderRefugio();
   if(id==='sc-hoy' && typeof renderHoy==='function') renderHoy();
-  if(id==='sc-dia'){ if(typeof renderDiaEntreno==='function') renderDiaEntreno(); if(typeof renderRecordatorios==='function') renderRecordatorios(); }
+  if(id==='sc-dia'){ if(typeof renderDia==='function') renderDia(); if(typeof renderDiaEntreno==='function') renderDiaEntreno(); if(typeof renderRecordatorios==='function') renderRecordatorios(); }
 }
 var tabBtns=document.querySelectorAll('.tab');
 for(var ti=0;ti<tabBtns.length;ti++){
@@ -5691,6 +4988,7 @@ function renderDia(){
 
   document.getElementById('in-steps').value=DAY.steps||'';
   document.getElementById('in-weight').value=DAY.weight||'';
+  var inBurnEl=document.getElementById('in-burn'); if(inBurnEl) inBurnEl.value=(DAY.macros&&DAY.macros.burn)||'';
   setMini('[data-supp="am"]',DAY.supp.am);
   setMini('[data-supp="pm"]',DAY.supp.pm);
   setMini('[data-poop="si"]',DAY.poop==='si');
@@ -5754,7 +5052,7 @@ function bindDia(){
   });
   ['kcal','prot','carb','fat'].forEach(function(m){
     document.getElementById('mac-'+m).addEventListener('input',function(){
-      DAY.macros[m]=this.value.replace(/[^\d]/g,''); this.value=DAY.macros[m]; saveDay(); renderKcalNet();
+      DAY.macros[m]=this.value.replace(/[^\d]/g,''); this.value=DAY.macros[m]; saveDay(); if(typeof renderKcalNet==='function') renderKcalNet();
     });
   });
 
@@ -5790,6 +5088,7 @@ function bindDia(){
 
   document.getElementById('in-steps').addEventListener('input',function(){ DAY.steps=this.value.replace(/[^\d]/g,''); this.value=DAY.steps; saveDay(); });
   document.getElementById('in-weight').addEventListener('input',function(){ DAY.weight=this.value.replace(/[^\d.,]/g,'').replace(',','.'); saveDay(); });
+  (function(){ var b=document.getElementById('in-burn'); if(b) b.addEventListener('input',function(){ if(!DAY.macros) DAY.macros={}; DAY.macros.burn=this.value.replace(/[^\d.,]/g,'').replace(',','.'); saveDay(); }); })();
   document.querySelectorAll('[data-supp]').forEach(function(b){
     b.addEventListener('click',function(){
       var f=this.getAttribute('data-supp'); DAY.supp[f]=!DAY.supp[f];
@@ -6451,7 +5750,7 @@ function renderRepoPatrones(){
       poop: d.poop==='si'
     });
   });
-  var goodMoods=['fuerte','tranquila','feliz','ligera'];
+  var goodMoods=['enérgica','bien'];
   var badMoods=['sensible','cansada','irascible','triste'];
 
   var cards='';
@@ -7751,6 +7050,8 @@ document.getElementById('prompt-ok').addEventListener('click',function(){
 document.getElementById('prompt-cancel').addEventListener('click',function(){ closeSheet('prompt-mask'); _promptCb=null; });
 document.getElementById('prompt-mask').addEventListener('click',function(e){ if(e.target===this){ closeSheet('prompt-mask'); _promptCb=null; } });
 document.getElementById('formula-mask').addEventListener('click',function(e){ if(e.target===this) closeSheet('formula-mask'); });
+document.getElementById('qpick-cancel').addEventListener('click',function(){ closeSheet('qpick-mask'); });
+document.getElementById('qpick-mask').addEventListener('click',function(e){ if(e.target===this) closeSheet('qpick-mask'); });
 
 bindProgreso();
 bindHistorial();
@@ -8344,7 +7645,8 @@ function generateWeekReport(){
     if(dd.weight) pesos.push(parseFloat(dd.weight));
     var kcal=dd.macros&&dd.macros.kcal?parseInt(dd.macros.kcal,10):0;
     var prot=dd.macros&&dd.macros.prot?parseInt(dd.macros.prot,10):0;
-    var kcalTx=kcal?'Kcal: '+kcal+(prot?' | Prot: '+prot+'g':''):'';
+    var burn=dd.macros&&dd.macros.burn?parseFloat((dd.macros.burn||'').replace(',','.')):0;
+    var kcalTx=kcal?'Kcal: '+kcal+(burn?' | Quemadas: '+Math.round(burn)+' | Déficit: '+(kcal-Math.round(burn)):'')+(prot?' | Prot: '+prot+'g':''):'';
     if(kcal){ totalKcal+=kcal; diasKcal++; }
     if(prot) totalProt+=prot;
     var parts=[dn+' — Sueño: '+slH];
@@ -8391,6 +7693,114 @@ function generateWeekReport(){
   a.download='semana-'+dateKey(monday)+'.txt';
   a.click();
 }
+function generateGymReport(){
+  var d=new Date(); var dow=d.getDay()===0?6:d.getDay()-1;
+  var monday=new Date(d); monday.setDate(d.getDate()-dow);
+  var sunday=new Date(monday); sunday.setDate(monday.getDate()+6);
+  var DNAMES=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  var MON_S=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var fmtDay=function(dt){ return dt.getDate()+' '+MON_S[dt.getMonth()]; };
+  var machLab={cycling:'Cycling',cinta:'Cinta',step:'Step master',bici:'Bici',eliptica:'Elíptica',remo:'Remo'};
+  var equipLab={barra:'barra',mancuernas:'mancuernas',maquina:'maquina',polea:'polea',corporal:'corporal',otro:'otro'};
+  var lines=['ENTRENOS DE LA SEMANA · '+fmtDay(monday)+'–'+fmtDay(sunday)+' '+monday.getFullYear(),''];
+  var hayEntrenos=0;
+  for(var i=0;i<7;i++){
+    var day=new Date(monday); day.setDate(monday.getDate()+i);
+    var dk=dateKey(day);
+    var dd=store.get('day',dk,null);
+    if(!dd||!dd.gym||!dd.gym.done) continue;
+    hayEntrenos++;
+    var sess=store.get('sess',dk,null);
+    // título del entreno
+    var rtLabel='';
+    if(sess&&!sess.libre&&sess.routineId){
+      var rt=rtById(sess.routineId);
+      if(rt) rtLabel=rt.name+' · Semana '+(sess.weekIdx+1)+' · Día '+(sess.dayIdx+1);
+    }
+    var dayNameLabel = sess&&sess.dayName ? sess.dayName : '';
+    var gtype=dd.gym.type||'';
+    var typeLabel='';
+    if(gtype==='fuerza'){
+      var fgMap={upper:'Upper',lower:'Lower','full body':'Full body'};
+      var fg=dd.gym.fgroup&&fgMap[dd.gym.fgroup]?fgMap[dd.gym.fgroup]:'';
+      typeLabel=(dayNameLabel||(fg?'Full body':'')||'Fuerza')+(fg&&!dayNameLabel?' #?':'');
+      if(!dayNameLabel&&fg) typeLabel=fg;
+    } else if(gtype==='cycling') typeLabel='Cycling';
+    else if(gtype==='cardio') typeLabel='Cardio';
+    else if(gtype==='clase') typeLabel='Clase'+(dd.gym.clase?' · '+dd.gym.clase:'');
+    else typeLabel='Entreno';
+    var entLabel=DNAMES[i]+' '+fmtDay(day)+' — '+typeLabel+(rtLabel?' ('+rtLabel+')':'');
+    // duración
+    var durTx='';
+    if(sess&&sess.startedAt&&sess.endedAt){
+      var m=Math.round((sess.endedAt-sess.startedAt)/60000);
+      if(m>0) durTx='Duración: '+(m>=60?Math.floor(m/60)+'h '+(m%60?m%60+' min':''):m+' min');
+    }
+    lines.push('■ '+entLabel);
+    if(durTx) lines.push(durTx);
+    // ejercicios
+    if(sess&&sess.exercises&&sess.exercises.length){
+      sess.exercises.forEach(function(ex){
+        if(ex.type==='circuit'){
+          var rounds=(ex.items&&ex.items[0]&&ex.items[0].sets)?ex.items[0].sets.length:ex.rounds||1;
+          lines.push('• Circuito ('+rounds+' rondas):');
+          (ex.items||[]).forEach(function(it){
+            var eq=it.equip?equipLab[it.equip]||it.equip:'';
+            lines.push('  - '+it.name+(eq?' ['+eq+']':''));
+            (it.sets||[]).forEach(function(st,si){
+              var rep=st.reps||'?';
+              var kg=parseFloat(String(st.kg||'').replace(',','.'))||0;
+              lines.push('     Ronda '+(si+1)+': '+rep+' reps'+(kg?' ('+kg+' kg)':''+' (sin peso)'));
+            });
+          });
+        } else {
+          if(!ex.name) return;
+          var done=(ex.sets||[]).filter(function(st){return st.done;});
+          if(!done.length) return;
+          var eq=ex.equip?equipLab[ex.equip]||ex.equip:'';
+          lines.push('• '+ex.name+(eq?' ['+eq+']':''));
+          done.forEach(function(st,si){
+            var rep=st.reps||'?';
+            var kg=parseFloat(String(st.kg||'').replace(',','.'))||0;
+            lines.push('   Serie '+(si+1)+': '+rep+' reps'+(kg?' × '+kg+' kg':' (sin peso)'));
+          });
+          if(ex.nota&&ex.nota.trim()) lines.push('     Nota: '+ex.nota.trim());
+        }
+      });
+    }
+    // cardio
+    if(sess&&sess.cardio&&sess.cardio.length){
+      sess.cardio.forEach(function(c){
+        var mach=machLab[c.machine]||c.machine||'Cardio';
+        lines.push('• '+mach);
+        var r=c.real||{};
+        if(r.time||r.km||r.kcal||r.rpm||r.watt){
+          var info=[];
+          if(r.time){ var tm=parseInt(r.time,10)||0; if(tm) info.push('Tiempo: '+(Math.floor(tm/60)>0?Math.floor(tm/60)+'h ':'')+(tm%60?tm%60+' min':'')); }
+          if(r.km) info.push('Distancia: '+r.km+' km');
+          if(r.kcal) info.push('Calorías: '+r.kcal+' kcal');
+          if(r.rpm) info.push('RPM: '+r.rpm);
+          if(r.watt) info.push('Vatios: '+r.watt+' W');
+          info.forEach(function(l){ lines.push('   '+l); });
+        } else {
+          lines.push('   (sin detalle de series)');
+        }
+      });
+    }
+    if(sess&&sess._pbs&&sess._pbs.length){
+      lines.push('🏆 PBs: '+sess._pbs.join(', '));
+    }
+    lines.push('');
+  }
+  if(!hayEntrenos){ lines.push('Sin entrenos registrados esta semana.'); }
+  else { lines.push('Total: '+hayEntrenos+' entreno'+(hayEntrenos>1?'s':'')); }
+  var txt=lines.join('\n');
+  var blob=new Blob([txt],{type:'text/plain'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='entrenos-'+dateKey(monday)+'.txt';
+  a.click();
+}
 function wkDayArr(val){
   // normaliza string o array → array (retrocompatible)
   if(!val||val==='nada') return [];
@@ -8404,7 +7814,6 @@ var DIA_SECS=[
   {id:'dia-sec-pelo',  label:'Pelo'},
   {id:'dia-sec-pasos', label:'Pasos'},
   {id:'dia-sec-peso',  label:'Peso'},
-  {id:'dia-sec-medidas',label:'Medidas'},
   {id:'dia-sec-mente', label:'Mi mente'},
   {id:'dia-sec-diario',label:'Diario'},
 ];
@@ -9367,7 +8776,7 @@ function renderSemana(){
     {k:'Comida',get:function(d){ if(!d||!d.mealJudge) return null; return d.mealJudge==='si'?'Sí':d.mealJudge==='no'?'No':'~'; }},
     {k:'Suplem.',get:function(d){ if(!d||!d.supp) return null; if(d.supp.am&&d.supp.pm) return '●●'; if(d.supp.am) return '●·'; if(d.supp.pm) return '·●'; return null; }},
     {k:'Baño',get:function(d){ if(!d||!d.poop) return null; return d.poop==='si'?'Sí':'No'; }},
-    {k:'Mi mente',get:function(d){ return (d&&miMenteDia(d))?'Sí':null; }},
+    {k:'Déficit',get:function(d){ if(!d||!d.macros||!d.macros.kcal) return null; var kcal=parseInt(d.macros.kcal,10)||0; var burn=parseFloat((d.macros.burn||'').replace(',','.'))||0; if(!kcal) return null; var def=kcal-burn; return (def>0?'+':'')+Math.round(def); }},
     {k:'Pasos',get:function(d){ if(!d||!d.steps) return null; var n=parseInt(d.steps,10)||0; return n>=1000?(Math.round(n/100)/10)+'k':n; }},
     {k:'Ánimo',get:function(d){ if(!d||!d.mood) return null; return d.mood.charAt(0).toUpperCase()+d.mood.slice(1,3); }},
     {k:'Día',isScore:true,get:function(d,dk){ if(!d) return null; var sc=dayScore(dk); if(!sc.has) return null; return Math.round(sc.score*100); }}
@@ -9437,6 +8846,7 @@ function renderSemana(){
 
   // números
   var slH=[],stepsArr=[],read=0,mente=0,gymN=tot,glovo=0,glovoC=0,wts=[];
+  var totalKcalWkDef=0, totalBurnWkDef=0, diasDeficit=0;
   dates.forEach(function(dk){
     if(parseKey(dk)>parseKey(TODAY)) return;
     var d=store.get('day',dk,null); if(!d) return;
@@ -9446,6 +8856,7 @@ function renderSemana(){
     if(miMenteDia(d)) mente++;
     if(d.weight&&!isNaN(parseFloat(d.weight))) wts.push({dk:dk,w:parseFloat(d.weight)});
     if(d.glovo&&d.glovo.type){ glovo++; glovoC+=parseFloat((d.glovo.cost||'').replace(',','.'))||0; }
+    if(d.macros&&d.macros.kcal){ var kc=parseInt(d.macros.kcal,10)||0; if(kc){totalKcalWkDef+=kc;totalBurnWkDef+=parseFloat((d.macros.burn||'').replace(',','.'))||0;diasDeficit++;} }
   });
   var slAvg=slH.length?Math.round(slH.reduce(function(a,b){return a+b;},0)/slH.length):0;
   var stAvg=stepsArr.length?Math.round(stepsArr.reduce(function(a,b){return a+b;},0)/stepsArr.length):0;
@@ -9471,11 +8882,13 @@ function renderSemana(){
     varTotTxt=(dt2<-0.05?'↓ ':dt2>0.05?'↑ ':'→ ')+(dt2>=0?'+':'')+dt2.toFixed(1)+' kg';
   }
 
+  var deficitSemTxt='—';
+  if(diasDeficit>0){ var defT=totalKcalWkDef-totalBurnWkDef; deficitSemTxt=(defT>0?'+':'')+Math.round(defT).toLocaleString('es')+' kcal'; }
   document.getElementById('wk-stats').innerHTML=
     '<div class="wk-stat"><div class="wk-stat-v">'+(slAvg?fmtH(slAvg):'—')+'</div><div class="wk-stat-k">sueño medio/noche</div></div>'+
     '<div class="wk-stat"><div class="wk-stat-v">'+gymN+'</div><div class="wk-stat-k">días haciendo deporte</div></div>'+
     '<div class="wk-stat"><div class="wk-stat-v">'+(stAvg?stAvg.toLocaleString('es'):'—')+'</div><div class="wk-stat-k">media de pasos/día</div></div>'+
-    '<div class="wk-stat"><div class="wk-stat-v">'+mente+'</div><div class="wk-stat-k">Mi mente</div></div>'+
+    '<div class="wk-stat"><div class="wk-stat-v" style="font-size:15px">'+deficitSemTxt+'</div><div class="wk-stat-k">déficit calórico semana</div></div>'+
     '<div class="wk-stat"><div class="wk-stat-v">'+wkWtTxt+'</div><div class="wk-stat-k">peso medio esta semana</div></div>'+
     '<div class="wk-stat"><div class="wk-stat-v" style="font-size:16px">'+varPrevTxt+'</div><div class="wk-stat-k">vs semana anterior</div><div class="wk-stat-d">total: '+varTotTxt+'</div></div>';
 
@@ -9494,7 +8907,7 @@ function renderSemana(){
       var j = d && d.mealJudge;
       if(j==='si') okN++;
       else if(j==='no') noN++;
-      else if(j==='mas-menos') masmenosN++;
+      else if(j==='más o menos') masmenosN++;
       else sinN++;
       if(d && d.macros && d.macros.kcal && parseInt(d.macros.kcal,10)>0){
         totalKcalWk += parseInt(d.macros.kcal,10);
@@ -9516,7 +8929,7 @@ function renderSemana(){
     dailyMeals.forEach(function(o,i){
       var d=parseKey(o.dk);
       var fechalab = DOWF[i]+' '+d.getDate()+' '+MON_SHORT[d.getMonth()];
-      var judgeLab = o.judge==='si' ? '<span class="wk-food-jok">como quería</span>' : o.judge==='no' ? '<span class="wk-food-jno">no como quería</span>' : o.judge==='mas-menos' ? '<span class="wk-food-jmm">más o menos</span>' : '';
+      var judgeLab = o.judge==='si' ? '<span class="wk-food-jok">como quería</span>' : o.judge==='no' ? '<span class="wk-food-jno">no como quería</span>' : o.judge==='más o menos' ? '<span class="wk-food-jmm">más o menos</span>' : '';
       var rows='';
       if(o.meals){
         ['desayuno','comida','cena','snacks'].forEach(function(k){
@@ -9537,6 +8950,82 @@ function renderSemana(){
         foodToggle.innerHTML = (open ? 'Ver comidas' : 'Ocultar comidas')+' <svg viewBox="0 0 24 24"><path d="'+(open?'M9 6l6 6-6 6':'M6 9l6 6 6-6')+'"/></svg>';
       };
     }
+  }
+
+  // entrenos de la semana
+  var gymDet=document.getElementById('wk-gym-detail');
+  if(gymDet){
+    var DOWG=['L','M','X','J','V','S','D'];
+    var MON_SG=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    var gymHTML='';
+    dates.forEach(function(dk,i){
+      if(parseKey(dk)>parseKey(TODAY)) return;
+      var d=store.get('day',dk,null);
+      if(!d||!d.gym||!d.gym.done) return;
+      var dObj=parseKey(dk);
+      var fechalab=DOWG[i]+' '+dObj.getDate()+' '+MON_SG[dObj.getMonth()];
+      var gtype=d.gym.type||'';
+      var typeLabel='';
+      if(gtype==='fuerza'){
+        var fgMap={upper:'Upper',lower:'Lower','full body':'Full body'};
+        typeLabel='Fuerza'+(d.gym.fgroup&&fgMap[d.gym.fgroup]?' · '+fgMap[d.gym.fgroup]:'');
+      } else if(gtype==='cycling') typeLabel='Cycling';
+      else if(gtype==='cardio') typeLabel='Cardio';
+      else if(gtype==='clase') typeLabel='Clase'+(d.gym.clase?' · '+escapeHtml(d.gym.clase):'');
+      else typeLabel='Entreno';
+      var sess=store.get('sess',dk,null);
+      var exHTML='';
+      if(sess&&sess.exercises&&sess.exercises.length){
+        var exRows='';
+        sess.exercises.forEach(function(ex){
+          if(ex.type==='circuit'){
+            (ex.items||[]).forEach(function(it){
+              var done=(it.sets||[]).filter(function(st){return st.done;});
+              if(!done.length) return;
+              var setsTx=done.length+'×'+(done[0].reps||'?');
+              var kgVals=done.map(function(st){return parseFloat(st.kg)||0;}).filter(function(v){return v>0;});
+              if(kgVals.length){
+                var maxKg=Math.max.apply(null,kgVals);
+                setsTx+=' · '+maxKg+' kg';
+              }
+              exRows+='<div class="wk-gym-ex-row"><span class="wk-gym-ex-name">'+escapeHtml(it.name||'')+'</span><span class="wk-gym-ex-sets">'+setsTx+'</span></div>';
+            });
+          } else {
+            if(!ex.name) return;
+            var done=(ex.sets||[]).filter(function(st){return st.done;});
+            if(!done.length) return;
+            var setsTx2=done.length+'×'+(done[0].reps||'?');
+            var kgVals2=done.map(function(st){return parseFloat(st.kg)||0;}).filter(function(v){return v>0;});
+            if(kgVals2.length){
+              var maxKg2=Math.max.apply(null,kgVals2);
+              setsTx2+=' · '+maxKg2+' kg';
+            }
+            exRows+='<div class="wk-gym-ex-row"><span class="wk-gym-ex-name">'+escapeHtml(ex.name)+'</span><span class="wk-gym-ex-sets">'+setsTx2+'</span></div>';
+          }
+        });
+        if(exRows) exHTML='<div class="wk-gym-ex">'+exRows+'</div>';
+      }
+      // cardio
+      var cardHTML='';
+      if(sess&&sess.cardio&&sess.cardio.length){
+        var cardRows='';
+        var machLab={cycling:'Cycling',cinta:'Cinta',step:'Step master',bici:'Bici',eliptica:'Elíptica',remo:'Remo'};
+        sess.cardio.forEach(function(c){
+          var mach=machLab[c.machine]||c.machine||'Cardio';
+          var r=c.real||{};
+          var info='';
+          if(r.time){ var tm=parseInt(r.time,10)||0; if(tm) info+=(Math.floor(tm/60)>0?Math.floor(tm/60)+'h ':'')+(tm%60?tm%60+'min':''); }
+          if(r.km) info+=(info?' · ':'')+r.km+' km';
+          if(r.kcal) info+=(info?' · ':'')+r.kcal+' kcal';
+          cardRows+='<div class="wk-gym-ex-row"><span class="wk-gym-ex-name">'+escapeHtml(mach)+'</span><span class="wk-gym-ex-sets">'+(info||'—')+'</span></div>';
+        });
+        if(cardRows) cardHTML='<div class="wk-gym-ex">'+cardRows+'</div>';
+      }
+      var dur='';
+      if(sess&&sess.startedAt&&sess.endedAt){ var m=Math.round((sess.endedAt-sess.startedAt)/60000); if(m>0) dur=' · '+(m>=60?Math.floor(m/60)+'h '+(m%60?m%60+'min':''):m+' min'); }
+      gymHTML+='<div class="wk-gym-day"><div class="wk-gym-day-h"><span class="wk-gym-day-d">'+fechalab+'</span><span class="wk-gym-type">'+typeLabel+dur+'</span></div>'+(exHTML||cardHTML||'')+'</div>';
+    });
+    gymDet.innerHTML=gymHTML||'<div class="wk-gym-empty">sin entrenos esta semana</div>';
   }
 
   // cierre semanal
@@ -10045,7 +9534,7 @@ function rtNext(){
     for(var d=0; d<rt.weeks[w].days.length; d++){
       if(!rtDayDone(rt.id,w,d)) return {rt:rt, w:w, d:d};
     }
-    if(w===startW) break; // en la semana efectiva, si todos hechos → allDone
+    if(rt.startDate && w===startW) break; // con fecha de inicio: solo la semana efectiva
   }
   return {rt:rt, w:startW, d:rt.weeks[startW].days.length-1, allDone:true};
 }
@@ -10853,10 +10342,15 @@ function renderEntrenoRecap(s, body){
 function rtSessTieneDatos(s){
   if(s.done || s.touched) return true;
   for(var i=0;i<s.exercises.length;i++){
-    for(var j=0;j<s.exercises[i].sets.length;j++){
-      var st=s.exercises[i].sets[j];
-      if(st.kg||st.done) return true;
-      if(st.reps && st.reps!==(st.plan||'')) return true;   // lo previsto no cuenta
+    var ex=s.exercises[i];
+    var grupos = ex.type==='circuit' ? (ex.items||[]) : [ex];   // los circuitos guardan sus series dentro de items
+    for(var g=0;g<grupos.length;g++){
+      var sets=grupos[g].sets||[];
+      for(var j=0;j<sets.length;j++){
+        var st=sets[j];
+        if(st.kg||st.done) return true;
+        if(st.reps && st.reps!==(st.plan||'')) return true;   // lo previsto no cuenta
+      }
     }
   }
   for(var c=0;c<(s.cardio||[]).length;c++){
@@ -14505,6 +13999,131 @@ document.getElementById('ch-edit-back').addEventListener('click',function(){
   st.textContent='.ch-late-opt{background:#fff;border:1px solid var(--tc-l,#D9CCE8);color:var(--tc-dd,#5E4F82);padding:14px;border-radius:var(--r-s);font-size:14px;font-weight:700;text-align:left;transition:all .12s}.ch-late-opt:active{background:var(--tc-ll,#F4EEFA)}.ch-late-opt.soft{background:var(--tc-ll,#F4EEFA);font-weight:600;font-style:italic}';
   document.head.appendChild(st);
 })();
+
+// ── FUSIONAR EJERCICIOS ──────────────────────────────────────────
+var _mergeSelected = [];
+
+function openMerge() {
+  _mergeSelected = [];
+  showScreen('sc-fuerza-merge', true);
+  renderMergeList();
+}
+
+function renderMergeList() {
+  var list = prList();
+  var wrap = document.getElementById('merge-list');
+  if (!list.length) {
+    wrap.innerHTML = '<div class="pr-empty">No tienes ejercicios guardados.</div>';
+    updateMergeActions();
+    return;
+  }
+  var groups = { upper: [], lower: [], otros: [] };
+  list.forEach(function(e) { groups[e.cat || 'otros'].push(e); });
+  var titles = { upper: 'Upper', lower: 'Lower', otros: 'Otros' };
+  var html = '';
+  ['upper', 'lower', 'otros'].forEach(function(g) {
+    if (!groups[g].length) return;
+    html += '<div class="pr-group-title">' + titles[g] + ' <span>' + groups[g].length + '</span></div>';
+    groups[g].forEach(function(e) {
+      var sel = _mergeSelected.indexOf(e.key) >= 0;
+      var eqTx = e.equip ? ' <span style="font-size:11px;color:var(--tinta-3)">· ' + e.equip + '</span>' : '';
+      html += '<div class="merge-row' + (sel ? ' merge-sel' : '') + '" data-mkey="' + encodeURIComponent(e.key) + '">' +
+        '<div class="merge-check"><svg viewBox="0 0 12 12"><path d="M2 6l3 3 5-5"/></svg></div>' +
+        '<div class="merge-name">' + escapeHtml(e.name) + eqTx + '</div>' +
+        '</div>';
+    });
+  });
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('.merge-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var key = decodeURIComponent(this.getAttribute('data-mkey'));
+      var idx = _mergeSelected.indexOf(key);
+      if (idx >= 0) { _mergeSelected.splice(idx, 1); this.classList.remove('merge-sel'); }
+      else { _mergeSelected.push(key); this.classList.add('merge-sel'); }
+      updateMergeActions();
+    });
+  });
+  updateMergeActions();
+}
+
+function updateMergeActions() {
+  var act = document.getElementById('merge-actions');
+  var opts = document.getElementById('merge-name-opts');
+  if (_mergeSelected.length < 2) { act.style.display = 'none'; return; }
+  act.style.display = 'block';
+  var optsHtml = _mergeSelected.map(function(key, i) {
+    var sp = rtSplitKey(key);
+    var eqHtml = sp.equip ? ' <span style="font-size:11px;color:var(--tinta-3)">' + sp.equip + '</span>' : '';
+    return '<label style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--linea);border-radius:var(--r-s);cursor:pointer;background:var(--blanco);margin-bottom:6px">' +
+      '<input type="radio" name="merge-name" value="' + encodeURIComponent(key) + '"' + (i === 0 ? ' checked' : '') + '>' +
+      '<span style="font-size:14px;font-weight:600">' + escapeHtml(sp.name) + eqHtml + '</span>' +
+      '</label>';
+  }).join('');
+  optsHtml += '<div style="margin-top:12px">' +
+    '<div style="font-size:12px;color:var(--tinta-3);margin-bottom:6px;font-weight:600;letter-spacing:.04em;text-transform:uppercase">O escribe un nombre nuevo:</div>' +
+    '<input type="text" id="merge-custom-name" placeholder="Nombre personalizado…" style="width:100%;padding:10px;border:1.5px solid var(--linea);border-radius:var(--r-s);font-size:14px;background:var(--blanco);color:var(--tinta);box-sizing:border-box">' +
+    '</div>';
+  opts.innerHTML = optsHtml;
+  // Wire events after setting innerHTML — no inline handlers needed
+  opts.querySelectorAll('input[name="merge-name"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      var ci = document.getElementById('merge-custom-name');
+      if (ci) ci.value = '';
+    });
+  });
+  var customInput = document.getElementById('merge-custom-name');
+  if (customInput) {
+    customInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        opts.querySelectorAll('input[name="merge-name"]').forEach(function(r) { r.checked = false; });
+      }
+    });
+  }
+}
+
+function doMerge() {
+  if (_mergeSelected.length < 2) { toast('Selecciona al menos 2 ejercicios'); return; }
+  var customInput = document.getElementById('merge-custom-name');
+  var customName = customInput ? customInput.value.trim() : '';
+  var radio = document.querySelector('input[name="merge-name"]:checked');
+  if (!customName && !radio) { toast('Elige o escribe el nombre definitivo'); return; }
+  var targetKey;
+  if (customName) {
+    var firstSp = rtSplitKey(_mergeSelected[0]);
+    targetKey = rtPrKey(customName, firstSp.equip);
+  } else {
+    targetKey = decodeURIComponent(radio.value);
+  }
+  var targetPr = (customName ? [] : store.get('pr', targetKey, [])) || [];
+  _mergeSelected.forEach(function(key) {
+    if (!customName && key === targetKey) return;
+    var recs = store.get('pr', key, []) || [];
+    recs.forEach(function(r) { targetPr.push(r); });
+    store.del('pr', key);
+    store.del('lastsets', key);
+    store.del('prcat', key);
+  });
+  targetPr.sort(function(a, b) { return a.date < b.date ? -1 : 1; });
+  store.set('pr', targetKey, targetPr);
+  toast('Fusionados ✓');
+  _mergeSelected = [];
+  showScreen('sc-repo-fuerza', false);
+  renderRepoFuerza();
+}
+
+['pr-merge-btn', 'pr-merge-btn2'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('click', openMerge);
+});
+(function(){
+  var mb = document.getElementById('merge-back');
+  if (mb) mb.addEventListener('click', function() { showScreen('sc-repo-fuerza', false); renderRepoFuerza(); });
+  var mc = document.getElementById('merge-confirm');
+  if (mc) mc.addEventListener('click', doMerge);
+  var mcl = document.getElementById('merge-clear');
+  if (mcl) mcl.addEventListener('click', function() { _mergeSelected = []; renderMergeList(); });
+})();
+// ── FIN FUSIONAR ─────────────────────────────────────────────────
 
 renderDayNav();
 refreshGreeting();
