@@ -1813,6 +1813,16 @@ button{cursor:pointer}
 .rt-dc.cur .rt-dc-ic svg{stroke:#fff}
 .rt-dc.done .rt-dc-ic svg{stroke:#fff}
 
+.rt-sum-top{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.rt-sum-top .rt-done-pill{margin-left:0}
+.rt-sum-date{font-size:13px;color:var(--tinta-2);font-weight:600}
+.rt-sum-eq{font-size:11px;color:var(--tinta-3);font-weight:600;white-space:nowrap}
+.rt-sum-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid var(--linea)}
+.rt-sum-row:first-of-type{border-top:none}
+.rt-sum-k{color:var(--tinta-3);font-weight:600}
+.rt-sum-v{color:var(--tinta);font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.rt-sum-sub{font-size:12.5px;font-weight:700;color:var(--tinta-2);margin:10px 0 2px}
+.rt-sum-empty{font-size:12.5px;color:var(--tinta-3);font-style:italic;padding:4px 0}
 .rt-done-pill{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--verde);padding:3px 10px;border-radius:20px;margin-left:8px;vertical-align:middle}
 .rt-ent-head{background:linear-gradient(160deg,var(--verde-ll),#D8EAD2);border-radius:var(--r-m);padding:14px 15px;margin-bottom:12px;border:0.5px solid var(--verde-l)}
 .rt-eh-supra{font-size:10px;font-weight:700;color:var(--verde-d);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
@@ -9797,7 +9807,12 @@ function renderHoyEntreno(){
       var ctx=rtPlanWeekForToday(rt); if(!ctx) return;
       var choice=this.getAttribute('data-wkask');
       var wi= choice==='adv' ? ctx.weekIdx : ctx.weekIdx-1;
-      rtSetWeekPref(rt.id,ctx.mondayKey, Math.min(Math.max(0,wi),rt.weeks.length-1));
+      wi=Math.min(Math.max(0,wi),rt.weeks.length-1);
+      if(choice==='rep' && rt.weeks[wi]){
+        // repetir: los días de esa semana vuelven a estar por hacer (los entrenos guardados no se borran)
+        rt.weeks[wi].days.forEach(function(_,di){ store.del('rtdone', rtDoneKey(rt.id,wi,di)); });
+      }
+      rtSetWeekPref(rt.id,ctx.mondayKey, wi);
       renderHoyEntreno();
     });
   });
@@ -9826,6 +9841,7 @@ function rtOpenToday(from){
   rtOpenSess(from);
 }
 function rtOpenSess(from){
+  RT_VIEW=null;
   RT_BACK=from||'sc-hoy';
   var tx=RT_BACK==='sc-dia'?'Mi día':(RT_BACK==='sc-repo-rutinas'?'Mis rutinas':'Hoy');
   document.getElementById('rt-ent-backtx').textContent=tx;
@@ -9850,7 +9866,165 @@ function rtTimerStart(){ if(RT_TIMER.running) return; RT_TIMER.running=true; RT_
 function rtTimerStop(){ if(!RT_TIMER.running) return; RT_TIMER.acc+=Date.now()-RT_TIMER.start; RT_TIMER.running=false; }
 function rtTimerReset(){ RT_TIMER.running=false; RT_TIMER.acc=0; clearInterval(RT_TIMER.id); RT_TIMER.id=null; var el=document.getElementById('rt-timer-disp'); if(el) el.textContent='00:00'; }
 
+/* ---- entrenos completados: vista resumen ---- */
+var RT_VIEW=null;       // día completado que se está mirando (no es el entreno abierto de hoy)
+var RT_EDIT_RET=null;   // fecha a la que volver tras editar un entreno de otro día
+
+/* Busca el entreno guardado de un día de la rutina ya completado */
+function rtFindDoneSess(rid,w,d){
+  var date=rtDayDone(rid,w,d);
+  if(!date || typeof date!=='string') return null;
+  var key=rid+'.'+w+'.'+d, out={rid:rid,w:w,d:d,date:date,where:null,s:null};
+  var cur=rtSess(date);
+  if(cur && !cur.libre && rtSessKey(cur)===key && cur.done){ out.where='sess'; out.s=cur; return out; }
+  var dr=rtDrafts(date);
+  for(var i=0;i<dr.length;i++){
+    if(!dr[i].libre && rtSessKey(dr[i])===key && dr[i].done){ out.where='draft'; out.s=dr[i]; return out; }
+  }
+  return out;
+}
+
+/* Navegar a un día de la rutina: si está hecho se ve su resumen; si no, se abre para hacerlo */
+function rtGoTo(rid,w,d){
+  var rt=rtById(rid); if(!rt) return;
+  if(w<0 || w>=rt.weeks.length) return;
+  if(d<0) d=0;
+  if(d>=rt.weeks[w].days.length) d=rt.weeks[w].days.length-1;
+  var done=rtFindDoneSess(rid,w,d);
+  if(done){
+    RT_VIEW = (done.date===CURRENT && done.where==='sess') ? null : done;
+    renderEntreno(); return;
+  }
+  RT_VIEW=null;
+  var cur=rtSess(CURRENT), key=rid+'.'+w+'.'+d;
+  if(cur && rtSessKey(cur)===key){ renderEntreno(); return; }
+  rtStash(cur);                                     // aparca lo de este día, si hay algo
+  var nueva=rtTakeDraft(key) || rtBuildSess(rt,w,d);
+  rtSaveSess(CURRENT,nueva);
+  renderEntreno();
+}
+
+function rtNavHTML(rt,w,d){
+  var h='<div class="rt-week-chip">'+
+    '<div><div class="rt-wc-lbl">'+escapeHtml(rt.name)+'</div>'+
+    '<div class="rt-wc-name">Semana '+(w+1)+'</div></div>'+
+    '<div class="rt-wc-arrows">'+
+      '<button class="rt-wc-arr" data-sw-wprev aria-label="Semana anterior"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>'+
+      '<button class="rt-wc-arr" data-sw-wnext aria-label="Semana siguiente"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>'+
+    '</div></div>';
+  h+='<div class="rt-days-cards">';
+  rt.weeks[w].days.forEach(function(dd,i){
+    var isC=i===d, isDone=rtDayDone(rt.id,w,i);
+    h+='<div class="rt-dc'+(isC?' cur':'')+(isDone?' done':'')+'" data-sw-d="'+i+'">'+
+      '<div class="rt-dc-num">D'+(i+1)+'</div>'+
+      '<div class="rt-dc-ic"><svg viewBox="0 0 24 24">'+(isDone?'<path d="M5 12l5 5L20 7"/>':'')+'</svg></div></div>';
+  });
+  return h+'</div>';
+}
+function rtBindNav(body,rid,w,d){
+  var p=body.querySelector('[data-sw-wprev]'), n=body.querySelector('[data-sw-wnext]');
+  if(p) p.addEventListener('click',function(){ rtGoTo(rid,w-1,d); });
+  if(n) n.addEventListener('click',function(){ rtGoTo(rid,w+1,d); });
+  body.querySelectorAll('[data-sw-d]').forEach(function(b){
+    b.addEventListener('click',function(){ rtGoTo(rid,w,+this.getAttribute('data-sw-d')); });
+  });
+}
+
+function rtSetTxt(st){
+  var r=st.reps||'?', kg=parseFloat(String(st.kg||'').replace(',','.'))||0;
+  return r+' reps'+(kg?' × '+kg+' kg':'');
+}
+function rtResumenBody(V){
+  var s=V.s, h='';
+  var dd=parseKey(V.date);
+  h+='<div class="rt-sum-top"><span class="rt-done-pill">Entreno completado</span>'+
+     '<span class="rt-sum-date">el '+DOW_FULL[dd.getDay()]+' '+dd.getDate()+' '+MON_SHORT[dd.getMonth()]+'</span></div>';
+  if(!s){
+    return h+'<div class="panel"><p class="rt-sum-empty">Este día está marcado como hecho, pero no hay detalle guardado de ese entreno.</p></div>';
+  }
+  if(s.startedAt && s.endedAt){
+    var m=Math.round((s.endedAt-s.startedAt)/60000);
+    if(m>0) h+='<div class="rt-recap-dur"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>'+
+      '<div><div class="rt-recap-dur-t">'+(m>=60?Math.floor(m/60)+'h '+(m%60)+' min':m+' min')+'</div><div class="rt-recap-dur-s">duración del entreno</div></div></div>';
+  }
+  if(s.type==='clase'){
+    h+='<div class="panel"><p class="rt-sum-empty">Clase hecha.</p></div>';
+  }
+  (s.exercises||[]).forEach(function(ex){
+    if(ex.type==='circuit'){
+      var it=ex.items||[];
+      h+='<div class="rt-ex"><div class="rt-ex-top"><div class="rt-ex-name">Circuito</div><span class="rt-sum-eq">'+(ex.rounds||'')+' rondas</span></div>';
+      it.forEach(function(x){
+        var done=(x.sets||[]).filter(function(st){return st.done;});
+        h+='<div class="rt-sum-sub">'+escapeHtml(x.name||'Ejercicio')+(x.equip?' <span class="rt-sum-eq">· '+escapeHtml(rtEquipLabel(x.equip).toLowerCase())+'</span>':'')+'</div>';
+        if(!done.length) h+='<div class="rt-sum-empty">sin rondas marcadas</div>';
+        (x.sets||[]).forEach(function(st,r){ if(st.done) h+='<div class="rt-sum-row"><span class="rt-sum-k">Ronda '+(r+1)+'</span><span class="rt-sum-v">'+rtSetTxt(st)+'</span></div>'; });
+      });
+      h+='</div>';
+      return;
+    }
+    var done=(ex.sets||[]).filter(function(st){return st.done;});
+    h+='<div class="rt-ex"><div class="rt-ex-top"><div class="rt-ex-name">'+escapeHtml(ex.name||'Ejercicio')+'</div>'+
+      (ex.equip?'<span class="rt-sum-eq">'+escapeHtml(rtEquipLabel(ex.equip))+'</span>':'')+'</div>';
+    if(!done.length) h+='<div class="rt-sum-empty">sin series marcadas</div>';
+    (ex.sets||[]).forEach(function(st,j){ if(st.done) h+='<div class="rt-sum-row"><span class="rt-sum-k">Serie '+(j+1)+'</span><span class="rt-sum-v">'+rtSetTxt(st)+'</span></div>'; });
+    if(ex.sesNota) h+='<div class="rt-nota" style="margin-top:8px"><svg viewBox="0 0 24 24"><path d="M9 12h6M9 16h4M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/></svg>'+escapeHtml(ex.sesNota)+'</div>';
+    h+='</div>';
+  });
+  (s.cardio||[]).forEach(function(b){
+    var r=b.real||{}, rows='';
+    if(r.tiempo) rows+='<div class="rt-sum-row"><span class="rt-sum-k">Tiempo</span><span class="rt-sum-v">'+escapeHtml(r.tiempo)+' min</span></div>';
+    if(r.km) rows+='<div class="rt-sum-row"><span class="rt-sum-k">Km</span><span class="rt-sum-v">'+escapeHtml(r.km)+'</span></div>';
+    if(r.vel) rows+='<div class="rt-sum-row"><span class="rt-sum-k">Velocidad</span><span class="rt-sum-v">'+escapeHtml(r.vel)+'</span></div>';
+    if(r.incl) rows+='<div class="rt-sum-row"><span class="rt-sum-k">Inclinación</span><span class="rt-sum-v">'+escapeHtml(r.incl)+'</span></div>';
+    if(b.mode==='intervalos') rows+='<div class="rt-sum-row"><span class="rt-sum-k">Series hechas</span><span class="rt-sum-v">'+(b.hechas||0)+(b.series?' de '+escapeHtml(b.series):'')+'</span></div>';
+    h+='<div class="rt-cardio"><div class="rt-cardio-t"><svg viewBox="0 0 24 24"><path d="M4 18V9M9 18V5M14 18v-7M19 18v-3"/></svg>'+
+      rtMachLabel(b.machine)+' · '+(b.mode==='intervalos'?'intervalos':'continuo')+'</div>'+
+      (rows||'<div class="rt-sum-empty">sin datos apuntados</div>')+'</div>';
+  });
+  if(s._pbs && s._pbs.length){
+    h+='<div class="rt-recap-pbs"><div class="rt-recap-pb-t">Récords de ese día</div>';
+    s._pbs.forEach(function(p){ h+='<div class="rt-recap-pb-row"><svg viewBox="0 0 24 24"><path d="M8 21l4-18 4 18-7-5h6z"/></svg>'+escapeHtml(p)+'</div>'; });
+    h+='</div>';
+  }
+  h+='<button class="rt-big-btn outline" id="rt-sum-edit" style="margin-top:14px">Editar</button>';
+  return h;
+}
+function renderEntrenoResumen(V){
+  var body=document.getElementById('rt-ent-body');
+  var rt=V.rid!=null? rtById(V.rid) : null;
+  var day=(rt && rt.weeks[V.w] && rt.weeks[V.w].days[V.d]) ? rt.weeks[V.w].days[V.d] : null;
+  var html='';
+  if(rt) html+=rtNavHTML(rt,V.w,V.d);
+  html+='<div class="rt-ent-head"><div class="rt-eh-name">'+escapeHtml(V.s&&V.s.libre?'Entreno libre':rtDayLabel(day||V.s||{}))+'</div>'+
+    (rt?'<div class="rt-eh-meta">'+escapeHtml(rt.name)+' · S'+(V.w+1)+' · D'+(V.d+1)+'</div>':'')+'</div>';
+  html+=rtResumenBody(V);
+  body.innerHTML=html;
+  if(rt) rtBindNav(body,rt.id,V.w,V.d);
+  var ed=document.getElementById('rt-sum-edit');
+  if(ed) ed.addEventListener('click',function(){ rtEditDone(V); });
+}
+/* Abre un entreno completado en modo edición (si es de otro día, se va a ese día mientras se edita) */
+function rtEditDone(V){
+  if(!V || !V.s) return;
+  if(V.date!==CURRENT){ RT_EDIT_RET=CURRENT; gotoDay(V.date); }
+  var key=rtSessKey(V.s), cur=rtSess(CURRENT), s2;
+  if(cur && rtSessKey(cur)===key && cur.done){ s2=cur; }
+  else { rtStash(cur); s2=rtTakeDraft(key) || V.s; }
+  s2.editing=true;
+  rtSaveSess(CURRENT,s2);
+  RT_VIEW=null;
+  renderEntreno();
+}
+/* Vuelve al día de origen si se estaba editando un entreno de otro día */
+function rtVolverDeEdicion(){
+  if(!RT_EDIT_RET) return;
+  var ret=RT_EDIT_RET; RT_EDIT_RET=null;
+  gotoDay(ret);
+}
+
 function renderEntreno(){
+  if(RT_VIEW){ renderEntrenoResumen(RT_VIEW); return; }
   var s=rtSess(CURRENT);
   var body=document.getElementById('rt-ent-body');
   if(!s){ body.innerHTML='<div class="rt-empty">No hay entreno abierto hoy.</div>'; return; }
@@ -9858,9 +10032,10 @@ function renderEntreno(){
   var day = (rt && rt.weeks[s.weekIdx] && rt.weeks[s.weekIdx].days[s.dayIdx]) ? rt.weeks[s.weekIdx].days[s.dayIdx] : null;
   var label=s.libre?'Entreno libre':rtDayLabel(day||s);
   if(s.recap){ renderEntrenoRecap(s, body); return; }
+  if(s.done && !s.editing){ renderEntrenoResumen({rid:s.libre?null:s.routineId, w:s.weekIdx, d:s.dayIdx, date:CURRENT, where:'sess', s:s}); return; }
 
   var html='';
-  if(rt){
+  if(rt && !s.editing){
     // Semana con flechas
     html+='<div class="rt-week-chip">'+
       '<div><div class="rt-wc-lbl">'+escapeHtml(rt.name)+'</div>'+
@@ -9892,7 +10067,7 @@ function renderEntreno(){
       '<div class="rt-eh-meta">'+escapeHtml(metaTx)+'</div></div>';
   } else {
     html+='<div class="rt-ent-head">'+
-      '<div class="rt-eh-name">Entreno libre'+(s.done?' <span class=\"rt-done-pill\">Hecho</span>':'')+'</div></div>';
+      '<div class="rt-eh-name">'+escapeHtml(label)+(s.editing?' <span class=\"rt-done-pill\">Editando</span>':(s.done?' <span class=\"rt-done-pill\">Hecho</span>':''))+'</div></div>';
   }
 
   // Timer de descanso
@@ -9935,7 +10110,8 @@ function renderEntreno(){
     html+='<button class="rt-big-btn outline" id="rt-cancel" style="margin-top:0">Descartar</button>';
     if(s.startedAt){ var mins=Math.round((Date.now()-s.startedAt)/60000); html+='<div class="rt-dur-note">'+mins+' min de entreno</div>'; }
   } else {
-    html+='<button class="rt-big-btn outline" id="rt-finish" style="margin-top:4px">Reabrir entreno</button>';
+    html+='<button class="rt-big-btn" id="rt-save-edit">Guardar cambios</button>';
+    html+='<button class="rt-big-btn outline" id="rt-finish" style="margin-top:0">Marcar como no hecho</button>';
   }
 
   body.innerHTML=html;
@@ -10249,16 +10425,10 @@ function rtBindEntreno(s){
   // Flechas de semana
   var sprev=body.querySelector('[data-sw-wprev]');
   var snext=body.querySelector('[data-sw-wnext]');
-  function cambiarSemana(delta){
-    var rt2=rtById(s.routineId); if(!rt2) return;
-    var newW=Math.max(0,Math.min(rt2.weeks.length-1, s.weekIdx+delta));
-    if(newW===s.weekIdx) return;
-    rtStash(s);
-    var nueva=rtTakeDraft(rt2.id+'.'+newW+'.'+s.dayIdx) || rtBuildSess(rt2,newW,Math.min(s.dayIdx,rt2.weeks[newW].days.length-1));
-    rtSaveSess(CURRENT,nueva); renderEntreno();
+  if(s.routineId!=null && !s.libre){
+    if(sprev) sprev.addEventListener('click',function(){ rtGoTo(s.routineId,s.weekIdx-1,s.dayIdx); });
+    if(snext) snext.addEventListener('click',function(){ rtGoTo(s.routineId,s.weekIdx+1,s.dayIdx); });
   }
-  if(sprev) sprev.addEventListener('click',function(){ cambiarSemana(-1); });
-  if(snext) snext.addEventListener('click',function(){ cambiarSemana(1); });
 
   // Timer
   var timTog=document.getElementById('rt-timer-tog');
@@ -10282,24 +10452,20 @@ function rtBindEntreno(s){
     body.querySelectorAll('[data-ex-timer-tog] path').forEach(function(p){ p.setAttribute('d','M5 3l14 9-14 9V3z'); });
   });
   if(RT_TIMER.running||RT_TIMER.acc>0){ if(!RT_TIMER.id) RT_TIMER.id=setInterval(rtTimerTick,500); rtTimerTick(); }
-  function cambiarA(w,d){
-    var rt2=rtById(s.routineId); if(!rt2) return;
-    if(w>=rt2.weeks.length) w=0;
-    if(d>=rt2.weeks[w].days.length) d=0;
-    if(w===s.weekIdx && d===s.dayIdx) return;
-    rtStash(s);                                            // aparca lo de este día, si hay algo
-    var nueva=rtTakeDraft(rt2.id+'.'+w+'.'+d) || rtBuildSess(rt2,w,d);
-    rtSaveSess(CURRENT,nueva);
-    renderEntreno();
+  if(s.routineId!=null && !s.libre){
+    body.querySelectorAll('[data-sw-d]').forEach(function(b){
+      b.addEventListener('click',function(){ rtGoTo(s.routineId, s.weekIdx, +this.getAttribute('data-sw-d')); });
+    });
   }
-  body.querySelectorAll('[data-sw-w]').forEach(function(b){
-    b.addEventListener('click',function(){ cambiarA(+this.getAttribute('data-sw-w'), s.dayIdx); });
-  });
-  body.querySelectorAll('[data-sw-d]').forEach(function(b){
-    b.addEventListener('click',function(){ cambiarA(s.weekIdx, +this.getAttribute('data-sw-d')); });
-  });
-  body.querySelectorAll('.rt-dc[data-sw-d]').forEach(function(b){
-    b.addEventListener('click',function(){ cambiarA(s.weekIdx, +this.getAttribute('data-sw-d')); });
+  var saveEd=document.getElementById('rt-save-edit');
+  if(saveEd) saveEd.addEventListener('click',function(){
+    s.editing=false;
+    rtFinish(s);                                  // recalcula récords y deja el día como hecho
+    var s2=rtSess(CURRENT); if(s2){ s2.recap=false; s2.editing=false; rtSaveSess(CURRENT,s2); }
+    var rid=s.libre?null:s.routineId, w=s.weekIdx, d=s.dayIdx;
+    if(RT_EDIT_RET){ rtVolverDeEdicion(); if(rid!=null) RT_VIEW=rtFindDoneSess(rid,w,d); }
+    renderEntreno();
+    toast('Cambios guardados');
   });
   var cancel=document.getElementById('rt-cancel');
   if(cancel) cancel.addEventListener('click',function(){
@@ -10313,7 +10479,11 @@ function rtBindEntreno(s){
   });
   var finBtn=document.getElementById('rt-finish');
   if(finBtn) finBtn.addEventListener('click',function(){
-    if(s.done){ s.done=false; s.recap=false; s._pbs=[]; save(); rtSyncDayGym(s); renderEntreno(); return; }
+    if(s.done){
+      s.done=false; s.recap=false; s.editing=false; s._pbs=[]; save(); rtSyncDayGym(s);
+      if(s.routineId!=null && !s.libre) store.del('rtdone', rtDoneKey(s.routineId,s.weekIdx,s.dayIdx));
+      renderEntreno(); return;
+    }
     if(s.type==='clase'){
       s.endedAt=Date.now(); if(!s.startedAt) s.startedAt=s.endedAt;
       s.done=true; s.recap=false; s._pbs=[];
@@ -11073,6 +11243,10 @@ document.getElementById('rt-cfg-back').addEventListener('click',function(){
   showScreen('sc-rutina-edit',false); renderRutinaEdit();
 });
 document.getElementById('rt-ent-back').addEventListener('click',function(){
+  RT_VIEW=null;
+  var _s=rtSess(CURRENT);
+  if(_s && _s.editing){ _s.editing=false; rtSaveSess(CURRENT,_s); }   // lo apuntado ya está guardado
+  rtVolverDeEdicion();
   showScreen(RT_BACK,false);
   if(RT_BACK==='sc-hoy' && typeof renderHoy==='function') renderHoy();
   if(RT_BACK==='sc-dia' && typeof renderDia==='function') renderDia();
