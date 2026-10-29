@@ -7631,9 +7631,8 @@ function rtEffectiveWeek(rt){
 
 /* ¿Esta semana el usuario aún no ha decidido? */
 function rtNeedWeekAsk(rt){
-  if(!rt||!rt.startDate) return false;
-  var ctx=rtPlanWeekForToday(rt); if(!ctx||ctx.weekIdx===0) return false;
-  return rtGetWeekPref(rt.id,ctx.mondayKey)===null;
+  // Los entrenos van en cola: ya no se pregunta si repetir o pasar de semana
+  return false;
 }
 
 function generateWeekReport(){
@@ -9555,19 +9554,16 @@ function rtWeekDone(rt,w){
 /* Siguiente día pendiente de la rutina activa */
 function rtNext(){
   var rt=rtActive(); if(!rt) return null;
-  var startW=0;
-  if(rt.startDate){
-    var ew=rtEffectiveWeek(rt);
-    if(ew===null) return null;
-    startW=ew;
-  }
-  for(var w=startW; w<rt.weeks.length; w++){
+  // Si la rutina aún no ha empezado (fecha de inicio futura), no propone nada
+  if(rt.startDate && parseKey(rt.startDate)>parseKey(TODAY)) return null;
+  // Cola: el siguiente entreno es siempre el primero sin hacer, sea de la semana que sea
+  for(var w=0; w<rt.weeks.length; w++){
     for(var d=0; d<rt.weeks[w].days.length; d++){
       if(!rtDayDone(rt.id,w,d)) return {rt:rt, w:w, d:d};
     }
-    if(rt.startDate && w===startW) break; // con fecha de inicio: solo la semana efectiva
   }
-  return {rt:rt, w:startW, d:rt.weeks[startW].days.length-1, allDone:true};
+  var lw=rt.weeks.length-1;
+  return {rt:rt, w:lw, d:rt.weeks[lw].days.length-1, allDone:true};
 }
 function rtDayLabel(day){
   if(!day || !day.type) return 'Sin configurar';
